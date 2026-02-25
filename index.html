@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>线马商机 - 实时同步版</title>
+<style>
+  *{box-sizing:border-box;font-family:Microsoft YaHei}
+  html,body{margin:0;padding:8px;background:#f5f7fa;height:100vh}
+  .container{background:#fff;border-radius:10px;padding:10px;height:100%;display:flex;flex-direction:column}
+  .top-bar{display:flex;justify-content:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+  button{padding:6px 10px;border:none;border-radius:4px;background:#0d7bff;color:#fff;cursor:pointer;transition:background 0.2s}
+  button:hover{opacity:0.9}
+  button.save{background:#07c160}
+  button.refresh{background:#165DFF}
+  button.del{background:#ff4d4f}
+  .filter-row{display:flex;gap:3px;margin-bottom:8px;flex-wrap:wrap}
+  .filter-row input{flex:1;min-width:100px;padding:4px 6px;font-size:12px;border:1px solid #ddd;border-radius:4px;outline:none}
+  .filter-row input:focus{border-color:#0d7bff}
+  .table-box{flex:1;overflow:auto;border:1px solid #eee;border-radius:4px}
+  table{width:100%;border-collapse:collapse;table-layout:fixed}
+  th,td{padding:6px 4px;text-align:center;border:1px solid #eee;font-size:12px;position:relative;word-break:break-all}
+  th{background:#f7f7fa}
+  .edit-input{position:absolute;left:0;top:0;width:100%;height:100%;border:none;text-align:center;background:transparent;outline:none;font-size:12px;padding:6px 4px}
+  .move-btn{background:#66bb6a;color:#fff;border:none;border-radius:2px;padding:2px 4px;font-size:12px;cursor:pointer;margin:0 1px}
+  .del-btn{background:#ff4d4f;color:#fff;border:none;border-radius:2px;padding:2px 4px;font-size:12px;cursor:pointer;margin:0 1px}
+  .pri-high{background:#ff4d4f;color:#fff}
+  .pri-middle{background:#ffeb3b;color:#333}
+  .pri-low{background:#90ee90;color:#333}
+  .modal{position:fixed;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:999}
+  .modal-box{background:#fff;padding:12px;border-radius:8px;width:240px;max-width:90vw}
+  .stage-option{padding:6px;background:#f2f2f2;border-radius:4px;margin:4px 0;cursor:pointer;transition:background 0.2s}
+  .stage-option:hover{background:#0d7bff;color:#fff}
+  .modal-hide{display:none}
+  #tip{text-align:center;font-size:12px;color:#666;margin-bottom:8px;height:16px;line-height:16px}
+  .sync-status{position:fixed;bottom:10px;right:10px;padding:6px 10px;background:rgba(0,0,0,0.7);color:#fff;border-radius:4px;font-size:12px;z-index:9999}
+  @media (max-width:768px) {
+    th,td{font-size:11px;padding:4px 2px}
+    .filter-row{gap:2px}
+    .filter-row input{min-width:80px;padding:3px 4px}
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="top-bar">
+    <button onclick="addRow()">＋ 新增</button>
+    <button class="refresh" onclick="loadFromCloud()">🔄 手动刷新</button>
+    <button class="del" onclick="clearAll()">清空</button>
+  </div>
+  <div id="tip"></div>
+
+  <div class="filter-row">
+    <input placeholder="更新日期" data-field="updateTime">
+    <input placeholder="创建日期" data-field="createTime">
+    <input placeholder="客户" data-field="customer">
+    <input placeholder="项目" data-field="project">
+    <input placeholder="优先级" data-field="priority">
+    <input placeholder="金额" data-field="amount">
+    <input placeholder="阶段" data-field="stage">
+    <input placeholder="备注" data-field="remark">
+  </div>
+
+  <div class="table-box">
+    <table>
+      <thead>
+        <tr>
+          <th width="70">操作</th>
+          <th width="35">序</th>
+          <th>更新</th>
+          <th>创建</th>
+          <th>客户</th>
+          <th>项目</th>
+          <th>优先级</th>
+          <th>金额</th>
+          <th>阶段</th>
+          <th>备注</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<div id="stageModal" class="modal modal-hide">
+  <div class="modal-box">
+    <h4 style="margin-top:0;margin-bottom:10px">选择阶段</h4>
+    <div class="stage-option" data-val="0-项目丢失">0-项目丢失</div>
+    <div class="stage-option" data-val="1-前期投标">1-前期投标</div>
+    <div class="stage-option" data-val="2-项目立项">2-项目立项</div>
+    <div class="stage-option" data-val="3-方案对接">3-方案对接</div>
+    <div class="stage-option" data-val="4-确定bom单">4-确定bom单</div>
+    <div class="stage-option" data-val="5-采购询价">5-采购询价</div>
+    <div class="stage-option" data-val="6-项目成交">6-项目成交</div>
+    <div style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:-1" onclick="closeModal()"></div>
+  </div>
+</div>
+
+<!-- 实时同步状态提示 -->
+<div id="syncStatus" class="sync-status modal-hide">同步中...</div>
+
+<script>
+// 🔴 必须替换为你的微信云开发配置
+const CLOUD_CONFIG = {
+  env: '你的环境ID-xxxx', // 云开发环境ID
+  getUrl: 'https://xxxx.servicewechat.com/http/getShangjiData', // 获取数据的云函数地址
+  saveUrl: 'https://xxxx.servicewechat.com/http/saveShangjiData', // 保存数据的云函数地址
+  clearUrl: 'https://xxxx.servicewechat.com/http/clearShangjiData' // 清空数据的云函数地址
+};
+
+let list = [];
+let filter = {}, editRow = null, editField = null;
+let isSyncing = false;
+let saveDebounceTimer = null; // 防抖定时器
+const tipEl = document.getElementById("tip");
+const stageModal = document.getElementById("stageModal");
+const tableBody = document.getElementById("tableBody");
+const syncStatusEl = document.getElementById("syncStatus");
+
+// 提示函数
+function tip(t, type = "info") {
+  tipEl.innerText = t;
+  tipEl.style.color = type === "error" ? "#ff4d4f" : type === "success" ? "#07c160" : "#666";
+  setTimeout(() => {
+    if (tipEl.innerText === t) tipEl.innerText = "";
+  }, 3000);
+}
+
+// 显示/隐藏同步状态
+function showSyncStatus(show) {
+  if (show) {
+    syncStatusEl.classList.remove('modal-hide');
+  } else {
+    syncStatusEl.classList.add('modal-hide');
+  }
+}
+
+// 🔴 从微信云开发加载数据（适配跨域）
+async function loadFromCloud() {
+  if (isSyncing) return;
+  isSyncing = true;
+  showSyncStatus(true);
+  
+  try {
+    // 添加跨域请求头，适配GitHub Pages
+    const res = await fetch(CLOUD_CONFIG.getUrl, {
+      method: 'GET',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      },
+      mode: 'cors', // 显式指定跨域模式
+      cache: 'no-cache' // 禁用缓存
+    });
+    
+    const data = await res.json();
+    if (data.success) {
+      list = data.data || [];
+      render();
+      tip("✅ 数据已同步", "success");
+    } else {
+      throw new Error(data.errMsg || "加载失败");
+    }
+  } catch (e) {
+    console.error("同步失败:", e);
+    tip("❌ 同步失败，检查网络或配置", "error");
+  } finally {
+    isSyncing = false;
+    showSyncStatus(false);
+  }
+}
+
+// 🔴 防抖保存数据（核心：实时保存但不频繁请求）
+function saveToCloudDebounce() {
+  // 清除之前的定时器
+  clearTimeout(saveDebounceTimer);
+  // 500毫秒内没有新操作，才执行保存（避免输入过程中频繁保存）
+  saveDebounceTimer = setTimeout(async () => {
+    await saveToCloud();
+  }, 500);
+}
+
+// 🔴 保存数据到微信云开发（适配跨域）
+async function saveToCloud() {
+  if (isSyncing || list.length === 0 && !confirm('确定保存空数据吗？')) return;
+  isSyncing = true;
+  showSyncStatus(true);
+  
+  try {
+    const res = await fetch(CLOUD_CONFIG.saveUrl, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      },
+      mode: 'cors',
+      body: JSON.stringify({ list: list })
+    });
+    
+    const data = await res.json();
+    if (data.success) {
+      tip("✅ 数据已实时保存", "success");
+      // 保存后刷新，确保多设备同步
+      setTimeout(loadFromCloud, 300);
+    } else {
+      throw new Error(data.errMsg || "保存失败");
+    }
+  } catch (e) {
+    console.error("保存失败:", e);
+    tip("❌ 保存失败，稍后自动重试", "error");
+    // 保存失败时自动重试一次
+    setTimeout(() => saveToCloudDebounce(), 2000);
+  } finally {
+    isSyncing = false;
+    showSyncStatus(false);
+  }
+}
+
+// 🔴 清空数据
+async function clearAll() {
+  if (!confirm('确定清空所有数据吗？此操作不可恢复！')) return;
+  if (isSyncing) return;
+  isSyncing = true;
+  showSyncStatus(true);
+  
+  try {
+    const res = await fetch(CLOUD_CONFIG.clearUrl, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      },
+      mode: 'cors'
+    });
+    
+    const data = await res.json();
+    if (data.success) {
+      list = [];
+      render();
+      tip("✅ 已清空所有数据", "success");
+      saveToCloudDebounce(); // 保存空数据
+    } else {
+      throw new Error(data.errMsg || "清空失败");
+    }
+  } catch (e) {
+    console.error("清空失败:", e);
+    tip("❌ 清空失败", "error");
+  } finally {
+    isSyncing = false;
+    showSyncStatus(false);
+  }
+}
+
+// 自动同步（10秒一次，确保多设备数据一致）
+setInterval(loadFromCloud, 10000);
+
+// 初始化
+loadFromCloud();
+initFilter();
+
+// ==================== 核心功能：实时保存 ====================
+function initFilter(){
+  document.querySelectorAll('.filter-row input').forEach(inp=>{
+    inp.oninput = ()=>{
+      filter[inp.dataset.field] = inp.value.trim().toLowerCase()
+      render()
+    }
+  })
+}
+
+// 阶段选择后自动保存
+document.querySelectorAll('.stage-option').forEach(opt=>{
+  opt.onclick = ()=>{
+    if (editRow === null || editField === null) return;
+    list[editRow][editField] = opt.dataset.val;
+    // 更新修改时间
+    list[editRow].updateTime = new Date().toLocaleString('zh-CN');
+    closeModal();
+    render();
+    saveToCloudDebounce(); // 自动保存
+  }
+})
+
+function openModal(r,f){ 
+  editRow = r; 
+  editField = f; 
+  stageModal.classList.remove('modal-hide');
+}
+
+function closeModal(){ 
+  stageModal.classList.add('modal-hide');
+  editRow = null;
+  editField = null;
+}
+
+// 新增行后自动保存
+function addRow(){
+  const now = new Date().toLocaleString('zh-CN');
+  list.unshift({
+    updateTime: now,
+    createTime: now,
+    customer: '',
+    project: '',
+    priority: '',
+    amount: '',
+    stage: '',
+    remark: ''
+  });
+  render();
+  saveToCloudDebounce(); // 自动保存
+}
+
+// 删除行后自动保存
+function deleteRow(i){ 
+  if(confirm('确定删除这条记录吗？')){ 
+    list.splice(i,1); 
+    render();
+    saveToCloudDebounce(); // 自动保存
+  } 
+}
+
+// 排序后自动保存
+function moveUp(i){ 
+  if(i<=0) return; 
+  [list[i], list[i-1]] = [list[i-1], list[i]]; 
+  // 更新排序后的修改时间
+  list[i].updateTime = new Date().toLocaleString('zh-CN');
+  list[i-1].updateTime = new Date().toLocaleString('zh-CN');
+  render(); 
+  saveToCloudDebounce(); // 自动保存
+}
+
+function moveDown(i){ 
+  if(i >= list.length-1) return; 
+  [list[i], list[i+1]] = [list[i+1], list[i]]; 
+  // 更新排序后的修改时间
+  list[i].updateTime = new Date().toLocaleString('zh-CN');
+  list[i+1].updateTime = new Date().toLocaleString('zh-CN');
+  render(); 
+  saveToCloudDebounce(); // 自动保存
+}
+
+function render(){
+  tableBody.innerHTML = '';
+  const filteredList = list.filter(item=>{
+    return Object.keys(filter).every(k=>{
+      const itemValue = (item[k] || '').toString().toLowerCase();
+      const filterValue = filter[k] || '';
+      return itemValue.includes(filterValue);
+    });
+  });
+
+  filteredList.forEach((item,idx)=>{
+    const tr = document.createElement('tr');
+    const cls = item.priority==='高'?'pri-high':item.priority==='中'?'pri-middle':item.priority==='低'?'pri-low':'';
+    
+    tr.innerHTML = `
+      <td>
+        <button class="move-btn" onclick="moveUp(${idx})">↑</button>
+        <button class="move-btn" onclick="moveDown(${idx})">↓</button>
+        <button class="del-btn" onclick="deleteRow(${idx})">删</button>
+      </td>
+      <td>${idx+1}</td>
+      <td>${item.updateTime||''}</td>
+      <td>${item.createTime||''}</td>
+      <td>${item.customer||''}</td>
+      <td>${item.project||''}</td>
+      <td class="${cls}">${item.priority||''}</td>
+      <td>${item.amount||''}</td>
+      <td>${item.stage||''}</td>
+      <td>${item.remark||''}</td>
+    `;
+    
+    tableBody.appendChild(tr);
+    tr.querySelectorAll('td').forEach((td,j)=>{
+      if(j<2) return;
+      td.style.cursor = 'pointer';
+      td.onclick = ()=>startEdit(td, idx, [
+        'updateTime','createTime','customer','project',
+        'priority','amount','stage','remark'
+      ][j-2]);
+    });
+  });
+
+  if (filteredList.length === 0) {
+    const emptyTr = document.createElement('tr');
+    emptyTr.innerHTML = `<td colspan="10" style="padding:20px;color:#999">暂无数据</td>`;
+    tableBody.appendChild(emptyTr);
+  }
+}
+
+// 编辑完成后自动保存
+function startEdit(td, i, f){
+  if(f === 'stage'){ 
+    openModal(i, f); 
+    return; 
+  }
+  
+  const input = document.createElement('input');
+  input.className = 'edit-input';
+  input.value = td.innerText || '';
+  td.innerHTML = '';
+  td.appendChild(input);
+  input.focus();
+  
+  const finishEdit = () => {
+    const oldValue = list[i][f] || '';
+    const newValue = input.value.trim();
+    
+    if (newValue !== oldValue) {
+      list[i][f] = newValue;
+      // 更新修改时间（创建时间除外）
+      if (f !== 'createTime') {
+        list[i].updateTime = new Date().toLocaleString('zh-CN');
+      }
+      render();
+      saveToCloudDebounce(); // 自动保存
+    }
+  };
+  
+  // 失去焦点自动保存
+  input.onblur = finishEdit;
+  // 回车自动保存
+  input.onkeydown = e => {
+    if(e.key === 'Enter'){
+      e.preventDefault();
+      finishEdit();
+    }
+  };
+}
+
+// ESC关闭模态框
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    closeModal();
+  }
+});
+
+// 页面关闭前确保数据保存
+window.addEventListener('beforeunload', () => {
+  saveToCloud(); // 页面关闭/刷新时强制保存
+});
+</script>
+</body>
+</html>
