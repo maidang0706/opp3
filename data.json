@@ -162,7 +162,7 @@ tbody tr.selected:nth-child(even) { background:#fff9c4 !important; }
 <span class="sync-dot syncing" id="syncDot"></span>
 <span id="syncText">同步中...</span>
 </span>
-<div id="syncDetail" style="display:none;font-size:11px;color:#c62828;margin-top:4px;max-width:680px;word-break:break-all;"></div>
+<div id="syncDetail" style="display: none; font-size: 11px; color: rgb(198, 40, 40); margin-top: 4px; max-width: 680px; word-break: break-all;"></div>
 </div>
 </div>
 <div class="header-actions">
