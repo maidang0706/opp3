@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><script type="text/javascript" src="chrome-extension://jhdpnjlknkdniefpnngedgkhhhabcmgl/hook-framework.umd.js"></script><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XM方案表-LT</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+            padding: 6px;
+            background-color: #f5f7fa;
+            font-size: 10px;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            background: white;
+            padding: 8px;
+            border-radius: 8px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+        }
+
+        /* 顶部：标题居中，按钮左上 */
+        .header-bar {
+            position: relative;
+            text-align: center;
+            margin-bottom: 6px;
+            min-height: 24px;
+        }
+
+        h1 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            line-height: 24px;
+        }
+
+        .add-column-btn {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            padding: 3px 8px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 10px;
+            font-weight: 500;
+            transition: all 0.3s;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        .add-column-btn:hover {
+            transform: translateY(-50%) scale(1.03);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            position: relative;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10px;
+        }
+
+        /* 原表头隐藏，首行按钮行已包含「筛选/参数/编辑/删除」 */
+        #dataTable thead { display: none; }
+
+        th, td {
+            border: 1px solid #d9d9d9;
+            padding: 1px 2px;
+            text-align: center;
+            position: relative;
+            word-break: break-all;
+            vertical-align: middle;
+        }
+
+        /* 最左筛选列（列宽进一步缩小） */
+        .col-filter {
+            min-width: 4px;
+            max-width: 5px;
+            background-color: #fafafa;
+            padding: 1px 0;
+        }
+
+        /* 参数列（与筛选列一致，进一步缩小） */
+        .col-label {
+            min-width: 4px;
+            max-width: 5px;
+            background-color: #e6f7ff;
+            text-align: center;
+            padding: 1px 0;
+        }
+
+        /* 数据列（列宽进一步缩小） */
+        th:not(.col-filter):not(.col-label),
+        td:not(.col-filter):not(.col-label) {
+            min-width: 8px;
+            max-width: 10px;
+        }
+
+        th:not(.col-filter):not(.col-label) {
+            background-color: #e6f7ff;
+            cursor: pointer;
+            transition: all 0.3s;
+            user-select: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 2px;
+            flex-wrap: nowrap;
+        }
+
+        th:not(.col-filter):not(.col-label):hover {
+            background-color: #bae7ff;
+        }
+
+        .edit-icon {
+            margin-left: 0;
+            color: #1890ff;
+            font-size: 10px;
+            cursor: pointer;
+        }
+
+        .del-icon {
+            margin-left: 0;
+            color: #ff4d4f;
+            font-size: 10px;
+            cursor: pointer;
+        }
+        .del-icon:hover { color: #ff7875; }
+
+        th:not(.col-filter):not(.col-label):hover .edit-icon {
+            color: #1890ff;
+        }
+
+        /* 左侧筛选输入框 */
+        .filter-input {
+            width: 100%;
+            padding: 1px 1px;
+            border: 1px solid #d9d9d9;
+            border-radius: 3px;
+            font-size: 9px;
+            outline: none;
+            font-family: inherit;
+            background: #fff;
+        }
+
+        .filter-input:focus {
+            border-color: #1890ff;
+            box-shadow: 0 0 0 2px rgba(24,144,255,0.1);
+        }
+
+        .row-label {
+            font-weight: 500;
+            color: #333;
+        }
+
+        td input.cell-input {
+            width: 100%;
+            border: none;
+            outline: none;
+            text-align: center;
+            background: transparent;
+            font-family: inherit;
+            font-size: 10px;
+            padding: 0;
+        }
+
+        td input.cell-input:focus {
+            background-color: #fffbe6;
+        }
+
+        /* 编辑模态框 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.45);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay.show { display: flex; }
+
+        .modal {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            width: 92%;
+            max-width: 460px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+        }
+
+        .modal-header {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 14px;
+            color: #333;
+        }
+
+        .modal-body textarea {
+            width: 100%;
+            min-height: 280px;
+            padding: 10px;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            line-height: 1.6;
+            resize: vertical;
+        }
+
+        /* 列编辑：锁定项只读展示区 */
+        .locked-area {
+            background: #f5f5f5;
+            border: 1px solid #e8e8e8;
+            border-radius: 4px;
+            padding: 8px 10px;
+            margin-bottom: 10px;
+        }
+        .locked-area .locked-title {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 6px;
+        }
+        .locked-line {
+            display: flex;
+            gap: 8px;
+            font-size: 13px;
+            padding: 2px 0;
+        }
+        .locked-line .lk-label {
+            width: 92px;
+            flex-shrink: 0;
+            color: #999;
+            text-align: right;
+        }
+        .locked-line .lk-val {
+            color: #666;
+        }
+
+        .modal-footer {
+            margin-top: 14px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 6px 16px;
+            border-radius: 4px;
+            border: 1px solid #d9d9d9;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s;
+        }
+
+        .btn-primary { background: #1890ff; color: white; border-color: #1890ff; }
+        .btn-primary:hover { background: #40a9ff; }
+        .btn-default:hover { color: #1890ff; border-color: #1890ff; }
+
+        td.hidden-col, th.hidden-col { display: none; }
+
+        /* 序列号：可点击，触发新增变更 */
+        .seq-num {
+            font-weight: 600;
+            color: #1890ff;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        .seq-num:hover { color: #40a9ff; }
+
+        /* GitHub 同步按钮 */
+        .gh-btn {
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            padding: 3px 8px;
+            background: linear-gradient(135deg, #2b5876 0%, #4e4376 100%);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 10px;
+            font-weight: 500;
+            box-shadow: 0 2px 8px rgba(43,88,118,0.3);
+        }
+        .gh-btn:hover { box-shadow: 0 4px 12px rgba(43,88,118,0.45); }
+
+        /* GitHub 同步弹窗字段 */
+        .gh-tip { font-size: 12px; color: #888; line-height: 1.6; margin: 0 0 10px; }
+        .gh-field { display: block; font-size: 13px; color: #333; margin-bottom: 12px; }
+        .gh-field input {
+            display: block; width: 100%; margin-top: 4px; padding: 6px 8px;
+            border: 1px solid #d9d9d9; border-radius: 4px; font-size: 13px; font-family: inherit;
+        }
+        .gh-hint { display: block; font-size: 11px; color: #bbb; margin-top: 3px; line-height: 1.5; }
+        .gh-check { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #333; margin: 2px 0 10px; }
+        .gh-check input { width: auto; margin: 0; }
+        .gh-status { font-size: 12px; color: #1890ff; min-height: 18px; margin-top: 4px; word-break: break-all; }
+
+        /* 顶部提示 toast */
+        .toast {
+            position: fixed; left: 50%; top: 20px; transform: translateX(-50%);
+            background: rgba(0,0,0,0.8); color: #fff; padding: 8px 16px;
+            border-radius: 6px; font-size: 13px; z-index: 9999;
+            opacity: 0; transition: opacity .3s; pointer-events: none;
+            max-width: 90%; text-align: center;
+        }
+        .toast.show { opacity: 1; }
+        .toast.success { background: rgba(24,144,24,0.92); }
+        .toast.error { background: rgba(220,40,40,0.92); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-bar">
+            <button class="add-column-btn" onclick="addColumn()">＋ 新增方案</button>
+            <button class="gh-btn" onclick="openGhModal()">☁ GitHub同步</button>
+            <h1>XM方案表-LT</h1>
+        </div>
+        <div class="table-wrapper">
+            <table id="dataTable">
+                <thead>
+                    <tr id="headerRow"><th class="col-filter">筛选</th><th class="col-label">参数</th><th data-col="0"></th><th data-col="1"></th></tr>
+                </thead>
+                <tbody id="tableBody"><tr><td class="col-filter">筛选</td><td class="col-label"><span class="row-label">参数</span></td><td data-col="0"><span class="edit-icon" title="编辑列" onclick="editColumn(0)">✎</span><span class="del-icon" title="删除列" onclick="deleteColumn(0)">✕</span></td><td data-col="1"><span class="edit-icon" title="编辑列" onclick="editColumn(1)">✎</span><span class="del-icon" title="删除列" onclick="deleteColumn(1)">✕</span></td></tr><tr data-row-key="sequence"><td class="col-filter"></td><td class="col-label"><span class="row-label">序列</span></td><td data-col="0" colspan="1"><span class="seq-num" onclick="openChangeModal(0)" title="点击新增变更">2</span></td><td data-col="1" colspan="1"><span class="seq-num" onclick="openChangeModal(1)" title="点击新增变更">1</span></td></tr><tr data-row-key="date"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="date" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">建档日期</span></td><td data-col="0" colspan="1"><span style="font-weight:600;color:#333;">26/07/22</span></td><td data-col="1" colspan="1"><span style="font-weight:600;color:#333;">26/07/22</span></td></tr><tr data-row-key="customer"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="customer" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">客户</span></td><td data-col="0" colspan="1"><span style="font-weight:600;color:#333;"></span></td><td data-col="1" colspan="1"><span style="font-weight:600;color:#333;"></span></td></tr><tr data-row-key="projectNo"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="projectNo" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">项目号</span></td><td data-col="0" colspan="1"><span style="font-weight:600;color:#333;"></span></td><td data-col="1" colspan="1"><span style="font-weight:600;color:#333;"></span></td></tr><tr data-row-key="projectName"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="projectName" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">项目名称</span></td><td data-col="0" colspan="1"><span style="font-weight:600;color:#333;"></span></td><td data-col="1" colspan="1"><span style="font-weight:600;color:#333;"></span></td></tr><tr data-row-key="engineer"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="engineer" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">工程师</span></td><td data-col="0" colspan="1"><span style="font-weight:600;color:#333;"></span></td><td data-col="1" colspan="1"><span style="font-weight:600;color:#333;"></span></td></tr><tr data-row-key="changeTime"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="changeTime" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">变更时间</span></td><td data-col="0"><input class="cell-input" type="text" value="" onchange="updateValue(6, 0, this.value)"></td><td data-col="1"><input class="cell-input" type="text" value="" onchange="updateValue(6, 1, this.value)"></td></tr><tr data-row-key="condition"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="condition" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">工况</span></td><td data-col="0"><input class="cell-input" type="text" value="" onchange="updateValue(7, 0, this.value)"></td><td data-col="1"><input class="cell-input" type="text" value="" onchange="updateValue(7, 1, this.value)"></td></tr><tr data-row-key="moduleLength"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="moduleLength" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">模组总长</span></td><td data-col="0"><input class="cell-input" type="text" value="" onchange="updateValue(8, 0, this.value)"></td><td data-col="1"><input class="cell-input" type="text" value="" onchange="updateValue(8, 1, this.value)"></td></tr><tr data-row-key="totalStroke"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="totalStroke" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">总行程</span></td><td data-col="0"><input class="cell-input" type="text" value="" onchange="updateValue(9, 0, this.value)"></td><td data-col="1"><input class="cell-input" type="text" value="" onchange="updateValue(9, 1, this.value)"></td></tr><tr data-row-key="orderModel"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="orderModel" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">模组下单型号</span></td><td data-col="0"><input class="cell-input" type="text" value="" onchange="updateValue(10, 0, this.value)"></td><td data-col="1"><input class="cell-input" type="text" value="" onchange="updateValue(10, 1, this.value)"></td></tr><tr data-row-key="motorModel"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="motorModel" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">电机型号</span></td><td data-col="0"><input class="cell-input" type="text" value="" onchange="updateValue(11, 0, this.value)"></td><td data-col="1"><input class="cell-input" type="text" value="" onchange="updateValue(11, 1, this.value)"></td></tr><tr data-row-key="moverCount"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="moverCount" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">动子个数</span></td><td data-col="0"><input class="cell-input" type="text" value="" onchange="updateValue(12, 0, this.value)"></td><td data-col="1"><input class="cell-input" type="text" value="" onchange="updateValue(12, 1, this.value)"></td></tr><tr data-row-key="driverModel"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="driverModel" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">驱动器型号</span></td><td data-col="0"><input class="cell-input" type="text" value="" onchange="updateValue(13, 0, this.value)"></td><td data-col="1"><input class="cell-input" type="text" value="" onchange="updateValue(13, 1, this.value)"></td></tr><tr data-row-key="driverPower"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="driverPower" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">驱动器功率</span></td><td data-col="0"><input class="cell-input" type="text" value="" onchange="updateValue(14, 0, this.value)"></td><td data-col="1"><input class="cell-input" type="text" value="" onchange="updateValue(14, 1, this.value)"></td></tr><tr data-row-key="photoelectric"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="photoelectric" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">光电</span></td><td data-col="0"><input class="cell-input" type="text" value="" onchange="updateValue(15, 0, this.value)"></td><td data-col="1"><input class="cell-input" type="text" value="" onchange="updateValue(15, 1, this.value)"></td></tr><tr data-row-key="guideRail"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="guideRail" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">导轨</span></td><td data-col="0"><input class="cell-input" type="text" value="" onchange="updateValue(16, 0, this.value)"></td><td data-col="1"><input class="cell-input" type="text" value="" onchange="updateValue(16, 1, this.value)"></td></tr><tr data-row-key="readHead"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="readHead" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">读头</span></td><td data-col="0"><input class="cell-input" type="text" value="" onchange="updateValue(17, 0, this.value)"></td><td data-col="1"><input class="cell-input" type="text" value="" onchange="updateValue(17, 1, this.value)"></td></tr><tr data-row-key="powerLine"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="powerLine" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">动力线</span></td><td data-col="0"><input class="cell-input" type="text" value="" onchange="updateValue(18, 0, this.value)"></td><td data-col="1"><input class="cell-input" type="text" value="" onchange="updateValue(18, 1, this.value)"></td></tr><tr data-row-key="encoderLine"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="encoderLine" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">编码器线</span></td><td data-col="0"><input class="cell-input" type="text" value="" onchange="updateValue(19, 0, this.value)"></td><td data-col="1"><input class="cell-input" type="text" value="" onchange="updateValue(19, 1, this.value)"></td></tr><tr data-row-key="drawingSource"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="drawingSource" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">图纸来源</span></td><td data-col="0"><input class="cell-input" type="text" value="" onchange="updateValue(20, 0, this.value)"></td><td data-col="1"><input class="cell-input" type="text" value="" onchange="updateValue(20, 1, this.value)"></td></tr><tr data-row-key="brakeResistor"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="brakeResistor" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">刹车电阻</span></td><td data-col="0"><input class="cell-input" type="text" value="" onchange="updateValue(21, 0, this.value)"></td><td data-col="1"><input class="cell-input" type="text" value="" onchange="updateValue(21, 1, this.value)"></td></tr><tr data-row-key="other"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="other" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">其他</span></td><td data-col="0"><input class="cell-input" type="text" value="" onchange="updateValue(22, 0, this.value)"></td><td data-col="1"><input class="cell-input" type="text" value="" onchange="updateValue(22, 1, this.value)"></td></tr></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 应用状态容器：自动保存的表格数据，供 GitHub 同步读写 -->
+    <script type="application/json" id="xm-state">{"tableData":[{"key":"sequence","label":"序列","filterable":false,"values":["2","1"]},{"key":"date","label":"建档日期","filterable":true,"values":["26/07/22","26/07/22",""]},{"key":"customer","label":"客户","filterable":true,"values":["","",""]},{"key":"projectNo","label":"项目号","filterable":true,"values":["","",""]},{"key":"projectName","label":"项目名称","filterable":true,"values":["","",""]},{"key":"engineer","label":"工程师","filterable":true,"values":["","",""]},{"key":"changeTime","label":"变更时间","filterable":true,"values":["","",""]},{"key":"condition","label":"工况","filterable":true,"values":["","",""]},{"key":"moduleLength","label":"模组总长","filterable":true,"values":["","",""]},{"key":"totalStroke","label":"总行程","filterable":true,"values":["","",""]},{"key":"orderModel","label":"模组下单型号","filterable":true,"values":["","",""]},{"key":"motorModel","label":"电机型号","filterable":true,"values":["","",""]},{"key":"moverCount","label":"动子个数","filterable":true,"values":["","",""]},{"key":"driverModel","label":"驱动器型号","filterable":true,"values":["","",""]},{"key":"driverPower","label":"驱动器功率","filterable":true,"values":["","",""]},{"key":"photoelectric","label":"光电","filterable":true,"values":["","",""]},{"key":"guideRail","label":"导轨","filterable":true,"values":["","",""]},{"key":"readHead","label":"读头","filterable":true,"values":["","",""]},{"key":"powerLine","label":"动力线","filterable":true,"values":["","",""]},{"key":"encoderLine","label":"编码器线","filterable":true,"values":["","",""]},{"key":"drawingSource","label":"图纸来源","filterable":true,"values":["","",""]},{"key":"brakeResistor","label":"刹车电阻","filterable":true,"values":["","",""]},{"key":"other","label":"其他","filterable":true,"values":["","",""]}],"columnCount":2}</script>
+
+    <!-- 顶部提示 toast -->
+    <div class="toast" id="toast">配置已保存</div>
+
+    <!-- GitHub 同步弹窗 -->
+    <div class="modal-overlay show" id="ghModal">
+        <div class="modal">
+            <div class="modal-header">GitHub 同步设置</div>
+            <div class="modal-body">
+                <p class="gh-tip">在 GitHub 上生成一个<strong>个人访问令牌 (PAT)</strong>（需 <code>repo</code> 权限），填入下方即可把本表格备份/同步到你的仓库。配置仅保存在本机浏览器 (localStorage)，不会上传。</p>
+                <label class="gh-field">① 个人访问令牌 (Token)
+                    <input id="ghToken" type="password" placeholder="ghp_xxxxxxxx 或 github_pat_xxxx">
+                    <span class="gh-hint">GitHub → 右上角头像 → Settings → Developer settings → Personal access tokens → 勾选 repo 权限后生成</span>
+                </label>
+                <label class="gh-field">② 仓库所有者 (用户名 / 组织名)
+                    <input id="ghOwner" type="text" placeholder="例如 octocat">
+                    <span class="gh-hint">你的 GitHub 登录名，或仓库所属组织名</span>
+                </label>
+                <label class="gh-field">③ 仓库名称 (Repository)
+                    <input id="ghRepo" type="text" placeholder="例如 xm-tables">
+                    <span class="gh-hint">存放该 HTML 的仓库名（不含 .git）</span>
+                </label>
+                <label class="gh-field">④ 分支 (Branch)
+                    <input id="ghBranch" type="text" placeholder="main 或 master">
+                    <span class="gh-hint">默认填 main；若仓库主分支是 master 则填 master</span>
+                </label>
+                <label class="gh-field">⑤ 文件路径 (File Path)
+                    <input id="ghPath" type="text" placeholder="XM方案表-LT.html">
+                    <span class="gh-hint">文件在仓库中的路径；放在根目录直接填文件名即可（建议就用本文件名，这样任意设备打开文件即是最新数据）</span>
+                </label>
+                <label class="gh-field">⑥ 提交信息 (Commit Message)
+                    <input id="ghCommit" type="text" placeholder="XM方案表 同步更新">
+                    <span class="gh-hint">上传到 GitHub 时的提交说明，留空则用默认文案</span>
+                </label>
+                <label class="gh-check">
+                    <input id="ghAuto" type="checkbox"> 自动同步：编辑后自动静默上传到 GitHub（防抖 1.5 秒）
+                </label>
+                <div id="ghStatus" class="gh-status">⏳ 正在上传…</div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" onclick="closeGhModal()">关闭</button>
+                <button class="btn btn-default" onclick="saveGhConfigFromModal()">保存配置</button>
+                <button class="btn btn-default" onclick="pullFromGithub()">从GitHub下载</button>
+                <button class="btn btn-primary" onclick="pushToGithub()">上传到GitHub</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑列模态框 -->
+    <div class="modal-overlay" id="editModal">
+        <div class="modal">
+            <div class="modal-header">编辑列内容</div>
+            <div class="modal-body">
+                <div id="lockedRows" class="locked-area"></div>
+                <textarea id="editTextarea"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" onclick="closeEditModal()">取消</button>
+                <button class="btn btn-primary" onclick="saveColumn()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 新增变更模态框 -->
+    <div class="modal-overlay" id="changeModal">
+        <div class="modal">
+            <div class="modal-header">新增变更</div>
+            <div class="modal-body">
+                <p id="changeModalText" style="font-size:13px;color:#555;line-height:1.7;margin:0;"></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" onclick="closeChangeModal()">取消</button>
+                <button class="btn btn-primary" onclick="confirmChange()">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 表格数据定义
+        const tableData = [
+            { key: 'sequence', label: '序列', filterable: false, values: ['', ''] },
+            { key: 'date', label: '建档日期', filterable: true, values: ['', '', ''] },
+            { key: 'customer', label: '客户', filterable: true, values: ['', '', ''] },
+            { key: 'projectNo', label: '项目号', filterable: true, values: ['', '', ''] },
+            { key: 'projectName', label: '项目名称', filterable: true, values: ['', '', ''] },
+            { key: 'engineer', label: '工程师', filterable: true, values: ['', '', ''] },
+            { key: 'changeTime', label: '变更时间', filterable: true, values: ['', '', ''] },
+            { key: 'condition', label: '工况', filterable: true, values: ['', '', ''] },
+            { key: 'moduleLength', label: '模组总长', filterable: true, values: ['', '', ''] },
+            { key: 'totalStroke', label: '总行程', filterable: true, values: ['', '', ''] },
+            { key: 'orderModel', label: '模组下单型号', filterable: true, values: ['', '', ''] },
+            { key: 'motorModel', label: '电机型号', filterable: true, values: ['', '', ''] },
+            { key: 'moverCount', label: '动子个数', filterable: true, values: ['', '', ''] },
+            { key: 'driverModel', label: '驱动器型号', filterable: true, values: ['', '', ''] },
+            { key: 'driverPower', label: '驱动器功率', filterable: true, values: ['', '', ''] },
+            { key: 'photoelectric', label: '光电', filterable: true, values: ['', '', ''] },
+            { key: 'guideRail', label: '导轨', filterable: true, values: ['', '', ''] },
+            { key: 'readHead', label: '读头', filterable: true, values: ['', '', ''] },
+            { key: 'powerLine', label: '动力线', filterable: true, values: ['', '', ''] },
+            { key: 'encoderLine', label: '编码器线', filterable: true, values: ['', '', ''] },
+            { key: 'drawingSource', label: '图纸来源', filterable: true, values: ['', '', ''] },
+            { key: 'brakeResistor', label: '刹车电阻', filterable: true, values: ['', '', ''] },
+            { key: 'other', label: '其他', filterable: true, values: ['', '', ''] }
+        ];
+
+        let currentEditCol = null;
+        let columnCount = 2;
+
+        // 当前日期，格式 YY/MM/DD（如 26/01/01）
+        function todayStr() {
+            const d = new Date();
+            const y = String(d.getFullYear()).slice(-2);
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${y}/${m}/${day}`;
+        }
+
+        // 当前时间，格式 YY/MM/DD HH点MM分（如 26/01/01 00点00分）
+        function nowStr() {
+            const d = new Date();
+            const y = String(d.getFullYear()).slice(-2);
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            const hh = String(d.getHours()).padStart(2, '0');
+            const mm = String(d.getMinutes()).padStart(2, '0');
+            return `${y}/${m}/${day} ${hh}点${mm}分`;
+        }
+
+        // 初始化表格
+        function initTable() {
+            const headerRow = document.getElementById('headerRow');
+            const tbody = document.getElementById('tableBody');
+            headerRow.innerHTML = '';
+            tbody.innerHTML = '';
+
+            // 自动生成序列号：仅在全空时初始化（保留新增变更插入的同序列号）
+            // 从右到左依次增加（最右列=1，最左列最大）
+            const seqVals = tableData[0].values;
+            if (!seqVals || seqVals.every(v => !v)) {
+                tableData[0].values = [];
+                for (let col = 0; col < columnCount; col++) {
+                    tableData[0].values.push(String(columnCount - col));
+                }
+            }
+
+            // 自动生成建档日期：新建（含新增列）时填充当前日期
+            const dateRow = tableData.find(r => r.key === 'date');
+            if (dateRow) {
+                for (let col = 0; col < columnCount; col++) {
+                    if (!dateRow.values[col]) dateRow.values[col] = todayStr();
+                }
+            }
+
+            // 表头：筛选列 + 参数列 + 数据列（数据列表头留空，按钮移至表格首行单元格）
+            const filterTh = document.createElement('th');
+            filterTh.className = 'col-filter';
+            filterTh.textContent = '筛选';
+            headerRow.appendChild(filterTh);
+
+            const labelTh = document.createElement('th');
+            labelTh.className = 'col-label';
+            labelTh.textContent = '参数';
+            headerRow.appendChild(labelTh);
+
+            for (let i = 0; i < columnCount; i++) {
+                const th = document.createElement('th');
+                th.dataset.col = i;
+                headerRow.appendChild(th);
+            }
+
+            // 计算同序列号的连续分组（用于合并行 colspan）
+            const groups = computeSeqGroups();
+
+            // 首行：编辑/删除按钮 与「筛选」「参数」文本 在同一行
+            const btnTr = document.createElement('tr');
+            const btnFTd = document.createElement('td');
+            btnFTd.className = 'col-filter';
+            btnFTd.textContent = '筛选';
+            btnTr.appendChild(btnFTd);
+            const btnLTd = document.createElement('td');
+            btnLTd.className = 'col-label';
+            btnLTd.innerHTML = '<span class="row-label">参数</span>';
+            btnTr.appendChild(btnLTd);
+            for (let i = 0; i < columnCount; i++) {
+                const btd = document.createElement('td');
+                btd.dataset.col = i;
+                btd.innerHTML =
+                    `<span class="edit-icon" title="编辑列" onclick="editColumn(${i})">✎</span>` +
+                    `<span class="del-icon" title="删除列" onclick="deleteColumn(${i})">✕</span>`;
+                btnTr.appendChild(btd);
+            }
+            tbody.appendChild(btnTr);
+
+            // 表体
+            tableData.forEach((row, rowIndex) => {
+                const tr = document.createElement('tr');
+                tr.dataset.rowKey = row.key;
+
+                // 筛选列（最左）
+                const filterTd = document.createElement('td');
+                filterTd.className = 'col-filter';
+                if (row.filterable) {
+                    filterTd.innerHTML = `<input class="filter-input" type="text" placeholder="筛选"
+                        data-row-key="${row.key}" oninput="applyFilters()">`;
+                }
+                tr.appendChild(filterTd);
+
+                // 参数列
+                const labelTd = document.createElement('td');
+                labelTd.className = 'col-label';
+                labelTd.innerHTML = `<span class="row-label">${row.label}</span>`;
+                tr.appendChild(labelTd);
+
+                // 数据列
+                for (let col = 0; col < columnCount; col++) {
+                    const val = row.values[col] !== undefined ? row.values[col] : '';
+                    if (isMergeRow(row.key)) {
+                        // 合并行：同序列号相邻列合并为一个单元格
+                        const g = groups[col];
+                        if (g.start === col) {
+                            const td = document.createElement('td');
+                            td.dataset.col = g.start;
+                            td.setAttribute('colspan', g.span);
+                            if (row.key === 'sequence') {
+                                td.innerHTML = `<span class="seq-num" onclick="openChangeModal(${g.start})" title="点击新增变更">${val}</span>`;
+                            } else {
+                                td.innerHTML = `<span style="font-weight:600;color:#333;">${val}</span>`;
+                            }
+                            tr.appendChild(td);
+                        }
+                        // 非组首列不渲染（被合并覆盖）
+                    } else {
+                        const td = document.createElement('td');
+                        td.dataset.col = col;
+                        td.innerHTML = `<input class="cell-input" type="text" value="${val}" onchange="updateValue(${rowIndex}, ${col}, this.value)">`;
+                        tr.appendChild(td);
+                    }
+                }
+
+                tbody.appendChild(tr);
+            });
+            saveStateToDom();
+        }
+
+        // 合并行：序列号、建档日期、客户、项目号、项目名称、工程师（同一序列号相邻列合并）
+        function isMergeRow(key) {
+            return ['sequence', 'date', 'customer', 'projectNo', 'projectName', 'engineer'].includes(key);
+        }
+
+        // 计算同序列号的连续分组（用于合并行 colspan）
+        function computeSeqGroups() {
+            const seqs = tableData[0].values;
+            const groups = [];
+            let col = 0;
+            while (col < columnCount) {
+                const seq = seqs[col];
+                let span = 1;
+                while (col + span < columnCount && seqs[col + span] === seq) span++;
+                for (let k = 0; k < span; k++) {
+                    groups[col + k] = { start: col, span: span };
+                }
+                col += span;
+            }
+            return groups;
+        }
+
+        // 新增变更：在目标列前插入同序列号列，公共行合并
+        let changeTargetCol = null;
+        function openChangeModal(col) {
+            changeTargetCol = col;
+            const seq = tableData[0].values[col];
+            document.getElementById('changeModalText').textContent =
+                `将在序列号「${seq}」的方案前新增一个变更列。客户、项目号、项目名称、工程师将自动合并，其余参数需重新填写。`;
+            document.getElementById('changeModal').classList.add('show');
+        }
+        function closeChangeModal() {
+            document.getElementById('changeModal').classList.remove('show');
+            changeTargetCol = null;
+        }
+        function confirmChange() {
+            if (changeTargetCol === null) return;
+            insertChangeColumn(changeTargetCol);
+            closeChangeModal();
+        }
+        function insertChangeColumn(beforeCol) {
+            const srcSeq = tableData[0].values[beforeCol];
+            tableData.forEach(row => {
+                let newVal = '';
+                if (row.key === 'sequence') {
+                    newVal = srcSeq;                       // 同序列号
+                } else if (row.key === 'changeTime') {
+                    newVal = nowStr();                     // 变更时间：新增变更时为当前时间
+                } else if (isMergeRow(row.key)) {
+                    newVal = row.values[beforeCol] || '';  // 合并：复制公共信息（含建档日期）
+                } else {
+                    newVal = '';                           // 其余行不合并，留空待填
+                }
+                row.values.splice(beforeCol, 0, newVal);
+            });
+            columnCount++;
+            initTable();
+            triggerAutoSync();
+        }
+
+        // 实时筛选：根据各筛选框，隐藏不匹配的数据列（按方案组统一判定，兼容合并单元格）
+        function applyFilters() {
+            const inputs = document.querySelectorAll('.filter-input');
+            const conditions = [];
+            inputs.forEach(inp => {
+                const v = inp.value.trim().toLowerCase();
+                if (v) conditions.push({ rowKey: inp.dataset.rowKey, val: v });
+            });
+
+            // 计算每列是否显示
+            const colShow = [];
+            for (let col = 0; col < columnCount; col++) {
+                let show = true;
+                conditions.forEach(cond => {
+                    const rowData = tableData.find(r => r.key === cond.rowKey);
+                    const cellVal = (rowData.values[col] || '').toString().toLowerCase();
+                    if (!cellVal.includes(cond.val)) show = false;
+                });
+                colShow[col] = show;
+            }
+
+            // 同一序列号为一组：组内任一列被隐藏则整组隐藏（方案整体进出）
+            const seqs = tableData[0].values;
+            let col = 0;
+            while (col < columnCount) {
+                const seq = seqs[col];
+                let span = 1;
+                while (col + span < columnCount && seqs[col + span] === seq) span++;
+                let groupShow = true;
+                for (let k = 0; k < span; k++) if (!colShow[col + k]) groupShow = false;
+                for (let k = 0; k < span; k++) colShow[col + k] = groupShow;
+                col += span;
+            }
+
+            // 应用：表头
+            for (let c = 0; c < columnCount; c++) {
+                document.querySelectorAll(`#dataTable thead th[data-col="${c}"]`).forEach(hc => {
+                    hc.classList.toggle('hidden-col', !colShow[c]);
+                });
+                // 各数据行：按 data-col 定位
+                document.querySelectorAll('#tableBody tr').forEach(tr => {
+                    const td = tr.querySelector(`td[data-col="${c}"]`);
+                    if (td) td.classList.toggle('hidden-col', !colShow[c]);
+                });
+            }
+        }
+
+        // 更新单元格值
+        function updateValue(rowIdx, colIdx, value) {
+            if (tableData[rowIdx]) tableData[rowIdx].values[colIdx] = value;
+            saveStateToDom();
+            triggerAutoSync();
+        }
+
+        // 列编辑中锁定的行（不可修改）：序列号、建档日期、客户
+        const LOCKED_KEYS = ['sequence', 'date', 'customer'];
+
+        // 编辑列
+        function editColumn(colIndex) {
+            currentEditCol = colIndex;
+            const modal = document.getElementById('editModal');
+            const lockedArea = document.getElementById('lockedRows');
+            const textarea = document.getElementById('editTextarea');
+            lockedArea.innerHTML = '';
+
+            // 锁定项标题
+            const title = document.createElement('div');
+            title.className = 'locked-title';
+            title.textContent = '以下为锁定项（自动生成，不可修改）：';
+            lockedArea.appendChild(title);
+
+            let content = '';
+            tableData.forEach(row => {
+                const val = row.values[colIndex] !== undefined ? row.values[colIndex] : '';
+                if (LOCKED_KEYS.includes(row.key)) {
+                    // 锁定项：只读显示，不能输入
+                    const line = document.createElement('div');
+                    line.className = 'locked-line';
+                    const l = document.createElement('span');
+                    l.className = 'lk-label';
+                    l.textContent = row.label;
+                    const v = document.createElement('span');
+                    v.className = 'lk-val';
+                    v.textContent = val;
+                    line.appendChild(l);
+                    line.appendChild(v);
+                    lockedArea.appendChild(line);
+                } else {
+                    // 可编辑项：填入文本框（之前的款式）
+                    content += row.label + ': ' + val + '\n';
+                }
+            });
+
+            textarea.value = content.trim();
+            modal.classList.add('show');
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').classList.remove('show');
+            currentEditCol = null;
+        }
+
+        function saveColumn() {
+            if (currentEditCol === null) return;
+            const textarea = document.getElementById('editTextarea');
+            textarea.value.split('\n').forEach(line => {
+                const m = line.match(/^(.+?):\s*(.*)$/);
+                if (m) {
+                    const rowData = tableData.find(r => r.label === m[1].trim());
+                    // 锁定项跳过，保持原值不可改
+                    if (rowData && !LOCKED_KEYS.includes(rowData.key)) {
+                        rowData.values[currentEditCol] = m[2].trim();
+                    }
+                }
+            });
+            initTable();
+            closeEditModal();
+            triggerAutoSync();
+        }
+
+        function addColumn() {
+            columnCount++;
+            // 普通新增方案：插在标题列（参数列）右边，即最左数据列；分配新的唯一方案号（最大+1）
+            const maxSeq = Math.max(0, ...tableData[0].values.map(v => parseInt(v) || 0));
+            const newSeq = String(maxSeq + 1);
+            tableData.forEach(row => {
+                const newVal = row.key === 'sequence' ? newSeq : '';
+                row.values.splice(0, 0, newVal);
+            });
+            initTable();
+            triggerAutoSync();
+        }
+
+        // 删除列
+        function deleteColumn(colIndex) {
+            if (columnCount <= 1) {
+                alert('至少保留一列，无法删除。');
+                return;
+            }
+            if (!confirm('确定删除该列？此操作不可撤销。')) return;
+            tableData.forEach(row => {
+                if (row.values[colIndex] !== undefined) row.values.splice(colIndex, 1);
+            });
+            columnCount--;
+            initTable();
+            triggerAutoSync();
+        }
+
+        document.getElementById('editModal').addEventListener('click', function(e) {
+            if (e.target === this) closeEditModal();
+        });
+
+        document.getElementById('changeModal').addEventListener('click', function(e) {
+            if (e.target === this) closeChangeModal();
+        });
+
+        /* ============ GitHub 同步功能 ============ */
+
+        // 将当前表格内存状态写入 #xm-state（随 HTML 一起被同步）
+        function saveStateToDom() {
+            const el = document.getElementById('xm-state');
+            if (el) el.textContent = JSON.stringify({ tableData: tableData, columnCount: columnCount });
+        }
+
+        // 自动同步：开启后，编辑动作防抖静默推送到 GitHub（对齐参考实现的 autoSync）
+        let autoSyncTimer = null;
+        function triggerAutoSync() {
+            const cfg = loadGhConfig();
+            if (!cfg.autoSync) return;
+            if (!cfg.token || !cfg.owner || !cfg.repo || !cfg.path) return;
+            clearTimeout(autoSyncTimer);
+            autoSyncTimer = setTimeout(() => pushToGithub(true), 1500);
+        }
+
+        // 从 #xm-state 还原表格状态（从 GitHub 下载后调用）
+        function loadStateFromDom() {
+            const el = document.getElementById('xm-state');
+            if (el && el.textContent && el.textContent.trim()) {
+                try {
+                    const s = JSON.parse(el.textContent);
+                    if (s.tableData && Array.isArray(s.tableData)) {
+                        tableData.length = 0;
+                        s.tableData.forEach(r => tableData.push(r));
+                    }
+                    if (typeof s.columnCount === 'number') columnCount = s.columnCount;
+                } catch (e) { /* 状态损坏则使用默认数据 */ }
+            }
+            initTable();
+        }
+
+        // 顶部提示
+        let toastTimer = null;
+        function showToast(msg, type) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.className = 'toast show' + (type ? ' ' + type : '');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => { t.className = 'toast'; }, 2600);
+        }
+        function setGhStatus(msg) {
+            const el = document.getElementById('ghStatus');
+            if (el) el.textContent = msg || '';
+        }
+
+        // 配置读写（仅本机 localStorage）
+        const GH_KEY = 'xm_gh_config';
+        function loadGhConfig() {
+            try { return JSON.parse(localStorage.getItem(GH_KEY)) || {}; } catch (e) { return {}; }
+        }
+        function saveGhConfig(cfg) {
+            localStorage.setItem(GH_KEY, JSON.stringify(cfg));
+        }
+
+        function openGhModal() {
+            const cfg = loadGhConfig();
+            document.getElementById('ghToken').value = cfg.token || '';
+            document.getElementById('ghOwner').value = cfg.owner || '';
+            document.getElementById('ghRepo').value = cfg.repo || '';
+            document.getElementById('ghBranch').value = cfg.branch || 'main';
+            document.getElementById('ghPath').value = cfg.path || 'XM方案表-LT.html';
+            document.getElementById('ghCommit').value = cfg.commit || 'XM方案表 同步更新';
+            document.getElementById('ghAuto').checked = !!cfg.autoSync;
+            setGhStatus('');
+            document.getElementById('ghModal').classList.add('show');
+        }
+        function closeGhModal() {
+            document.getElementById('ghModal').classList.remove('show');
+        }
+        function saveGhConfigFromModal() {
+            const cfg = {
+                token: document.getElementById('ghToken').value.trim(),
+                owner: document.getElementById('ghOwner').value.trim(),
+                repo: document.getElementById('ghRepo').value.trim(),
+                branch: document.getElementById('ghBranch').value.trim() || 'main',
+                path: document.getElementById('ghPath').value.trim() || 'XM方案表-LT.html',
+                commit: document.getElementById('ghCommit').value.trim() || 'XM方案表 同步更新',
+                autoSync: document.getElementById('ghAuto').checked
+            };
+            saveGhConfig(cfg);
+            setGhStatus('✅ 配置已保存到本机');
+            showToast('配置已保存', 'success');
+        }
+
+        // 取得要同步的完整 HTML（含最新状态）
+        function getSyncContent() {
+            saveStateToDom();
+            return '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+        }
+
+        // 上传到 GitHub（新建或更新文件）；silent=true 时静默（自动同步用，不弹提示）
+        async function pushToGithub(silent) {
+            silent = silent || false;
+            const cfg = loadGhConfig();
+            if (!cfg.token || !cfg.owner || !cfg.repo || !cfg.path) {
+                if (!silent) { showToast('请先填写完整的 GitHub 配置并保存', 'error'); setGhStatus('❌ 配置不完整，请先「保存配置」'); }
+                return;
+            }
+            const apiPath = encodeURIComponent(cfg.path);
+            const url = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${apiPath}`;
+            const headers = { 'Authorization': 'token ' + cfg.token, 'Accept': 'application/vnd.github+json' };
+            try {
+                setGhStatus('⏳ 正在上传…');
+                // 先查是否已有文件（拿到 sha）
+                let sha = null;
+                const refQ = cfg.branch ? '?ref=' + encodeURIComponent(cfg.branch) : '';
+                const getRes = await fetch(url + refQ, { headers });
+                if (getRes.ok) {
+                    const j = await getRes.json();
+                    sha = j.sha || null;
+                } else if (getRes.status !== 404) {
+                    const err = await getRes.json().catch(() => ({}));
+                    throw new Error(err.message || ('读取失败 ' + getRes.status));
+                }
+                const content = btoa(unescape(encodeURIComponent(getSyncContent())));
+                const body = {
+                    message: (cfg.commit || 'XM方案表 同步更新') + ' ' + new Date().toLocaleString(),
+                    content: content
+                };
+                if (sha) body.sha = sha;
+                if (cfg.branch) body.branch = cfg.branch;
+                const putRes = await fetch(url, {
+                    method: 'PUT',
+                    headers: Object.assign({ 'Content-Type': 'application/json' }, headers),
+                    body: JSON.stringify(body)
+                });
+                if (!putRes.ok) {
+                    const err = await putRes.json().catch(() => ({}));
+                    throw new Error(err.message || ('上传失败 ' + putRes.status));
+                }
+                setGhStatus('✅ 已上传到 GitHub：' + cfg.path);
+                if (!silent) showToast('上传成功', 'success');
+            } catch (e) {
+                setGhStatus('❌ ' + e.message);
+                showToast((silent ? '自动同步失败：' : '上传失败：') + e.message, 'error');
+            }
+        }
+
+        // 从 GitHub 下载并还原
+        async function pullFromGithub() {
+            const cfg = loadGhConfig();
+            if (!cfg.token || !cfg.owner || !cfg.repo || !cfg.path) {
+                showToast('请先填写完整的 GitHub 配置并保存', 'error');
+                setGhStatus('❌ 配置不完整，请先「保存配置」');
+                return;
+            }
+            const apiPath = encodeURIComponent(cfg.path);
+            const url = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${apiPath}?ref=` + encodeURIComponent(cfg.branch);
+            try {
+                setGhStatus('⏳ 正在下载…');
+                const res = await fetch(url, {
+                    headers: { 'Authorization': 'token ' + cfg.token, 'Accept': 'application/vnd.github+json' }
+                });
+                if (!res.ok) {
+                    const err = await res.json().catch(() => ({}));
+                    throw new Error(err.message || ('下载失败 ' + res.status));
+                }
+                const j = await res.json();
+                const bin = atob(j.content.replace(/\s/g, ''));
+                const html = decodeURIComponent(escape(bin));
+                const doc = new DOMParser().parseFromString(html, 'text/html');
+                const stateEl = doc.getElementById('xm-state');
+                if (!stateEl || !stateEl.textContent.trim()) throw new Error('文件中未找到状态数据');
+                const s = JSON.parse(stateEl.textContent);
+                if (!s.tableData || !Array.isArray(s.tableData)) throw new Error('状态数据格式不正确');
+                tableData.length = 0;
+                s.tableData.forEach(r => tableData.push(r));
+                if (typeof s.columnCount === 'number') columnCount = s.columnCount;
+                initTable();
+                setGhStatus('✅ 已从 GitHub 下载：' + cfg.path);
+                showToast('下载成功', 'success');
+            } catch (e) {
+                setGhStatus('❌ ' + e.message);
+                showToast('下载失败：' + e.message, 'error');
+            }
+        }
+
+        loadStateFromDom();
+    </script>
+
+
+</body></html>
