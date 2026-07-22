@@ -287,38 +287,34 @@
         }
         .seq-num:hover { color: #40a9ff; }
 
-        /* GitHub 同步按钮 */
-        .gh-btn {
+        /* GitHub 同步状态指示灯 */
+        .sync-indicator {
             position: absolute;
             right: 0;
             top: 50%;
             transform: translateY(-50%);
             display: inline-flex;
             align-items: center;
-            gap: 3px;
-            padding: 3px 8px;
-            background: linear-gradient(135deg, #2b5876 0%, #4e4376 100%);
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
+            gap: 4px;
             font-size: 10px;
-            font-weight: 500;
-            box-shadow: 0 2px 8px rgba(43,88,118,0.3);
+            padding: 2px 8px;
+            border-radius: 10px;
+            background: #f0f0f0;
+            color: #888;
+            white-space: nowrap;
         }
-        .gh-btn:hover { box-shadow: 0 4px 12px rgba(43,88,118,0.45); }
-
-        /* GitHub 同步弹窗字段 */
-        .gh-tip { font-size: 12px; color: #888; line-height: 1.6; margin: 0 0 10px; }
-        .gh-field { display: block; font-size: 13px; color: #333; margin-bottom: 12px; }
-        .gh-field input {
-            display: block; width: 100%; margin-top: 4px; padding: 6px 8px;
-            border: 1px solid #d9d9d9; border-radius: 4px; font-size: 13px; font-family: inherit;
+        .sync-indicator::before {
+            content: '';
+            width: 7px; height: 7px;
+            border-radius: 50%;
+            background: #bbb;
         }
-        .gh-hint { display: block; font-size: 11px; color: #bbb; margin-top: 3px; line-height: 1.5; }
-        .gh-check { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #333; margin: 2px 0 10px; }
-        .gh-check input { width: auto; margin: 0; }
-        .gh-status { font-size: 12px; color: #1890ff; min-height: 18px; margin-top: 4px; word-break: break-all; }
+        .sync-indicator.sync-ing { background: #e6f7ff; color: #1890ff; }
+        .sync-indicator.sync-ing::before { background: #1890ff; }
+        .sync-indicator.sync-ok { background: #f6ffed; color: #52c41a; }
+        .sync-indicator.sync-ok::before { background: #52c41a; }
+        .sync-indicator.sync-err { background: #fff1f0; color: #ff4d4f; }
+        .sync-indicator.sync-err::before { background: #ff4d4f; }
 
         /* 顶部提示 toast */
         .toast {
@@ -337,75 +333,31 @@
     <div class="container">
         <div class="header-bar">
             <button class="add-column-btn" onclick="addColumn()">＋ 新增方案</button>
-            <button class="gh-btn" onclick="openGhModal()">☁ GitHub同步</button>
+            <span class="sync-indicator sync-ing" id="syncIndicator">同步中…</span>
             <h1>XM方案表-LT</h1>
         </div>
         <div class="table-wrapper">
             <table id="dataTable">
                 <thead>
-                    <tr id="headerRow"><th class="col-filter">筛选</th><th class="col-label">参数</th><th data-col="0"></th><th data-col="1" class="hidden-col"></th><th data-col="2" class="hidden-col"></th></tr>
+                    <tr id="headerRow"><th class="col-filter">筛选</th><th class="col-label">参数</th><th data-col="0"></th><th data-col="1"></th><th data-col="2"></th></tr>
                 </thead>
-                <tbody id="tableBody"><tr><td class="col-filter">筛选</td><td class="col-label"><span class="row-label">参数</span></td><td data-col="0"><span class="edit-icon" title="编辑列" onclick="editColumn(0)">✎</span><span class="del-icon" title="删除列" onclick="deleteColumn(0)">✕</span></td><td data-col="1" class="hidden-col"><span class="edit-icon" title="编辑列" onclick="editColumn(1)">✎</span><span class="del-icon" title="删除列" onclick="deleteColumn(1)">✕</span></td><td data-col="2" class="hidden-col"><span class="edit-icon" title="编辑列" onclick="editColumn(2)">✎</span><span class="del-icon" title="删除列" onclick="deleteColumn(2)">✕</span></td></tr><tr data-row-key="sequence"><td class="col-filter"></td><td class="col-label"><span class="row-label">序列</span></td><td data-col="0" colspan="1"><span class="seq-num" onclick="openChangeModal(0)" title="点击新增变更">3</span></td><td data-col="1" colspan="1" class="hidden-col"><span class="seq-num" onclick="openChangeModal(1)" title="点击新增变更">2</span></td><td data-col="2" colspan="1" class="hidden-col"><span class="seq-num" onclick="openChangeModal(2)" title="点击新增变更">1</span></td></tr><tr data-row-key="date"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="date" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">建档日期</span></td><td data-col="0" colspan="1"><span style="font-weight:600;color:#333;">26/07/22</span></td><td data-col="1" colspan="1" class="hidden-col"><span style="font-weight:600;color:#333;">26/07/22</span></td><td data-col="2" colspan="1" class="hidden-col"><span style="font-weight:600;color:#333;">26/07/22</span></td></tr><tr data-row-key="customer"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="customer" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">客户</span></td><td data-col="0" colspan="1"><span style="font-weight:600;color:#333;"></span></td><td data-col="1" colspan="1" class="hidden-col"><span style="font-weight:600;color:#333;"></span></td><td data-col="2" colspan="1" class="hidden-col"><span style="font-weight:600;color:#333;"></span></td></tr><tr data-row-key="projectNo"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="projectNo" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">项目号</span></td><td data-col="0" colspan="1"><span style="font-weight:600;color:#333;"></span></td><td data-col="1" colspan="1" class="hidden-col"><span style="font-weight:600;color:#333;"></span></td><td data-col="2" colspan="1" class="hidden-col"><span style="font-weight:600;color:#333;"></span></td></tr><tr data-row-key="projectName"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="projectName" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">项目名称</span></td><td data-col="0" colspan="1"><span style="font-weight:600;color:#333;"></span></td><td data-col="1" colspan="1" class="hidden-col"><span style="font-weight:600;color:#333;"></span></td><td data-col="2" colspan="1" class="hidden-col"><span style="font-weight:600;color:#333;"></span></td></tr><tr data-row-key="engineer"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="engineer" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">工程师</span></td><td data-col="0" colspan="1"><span style="font-weight:600;color:#333;"></span></td><td data-col="1" colspan="1" class="hidden-col"><span style="font-weight:600;color:#333;"></span></td><td data-col="2" colspan="1" class="hidden-col"><span style="font-weight:600;color:#333;"></span></td></tr><tr data-row-key="changeTime"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="changeTime" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">变更时间</span></td><td data-col="0"><input class="cell-input" type="text" value="" onchange="updateValue(6, 0, this.value)"></td><td data-col="1" class="hidden-col"><input class="cell-input" type="text" value="" onchange="updateValue(6, 1, this.value)"></td><td data-col="2" class="hidden-col"><input class="cell-input" type="text" value="" onchange="updateValue(6, 2, this.value)"></td></tr><tr data-row-key="condition"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="condition" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">工况</span></td><td data-col="0"><input class="cell-input" type="text" value="" onchange="updateValue(7, 0, this.value)"></td><td data-col="1" class="hidden-col"><input class="cell-input" type="text" value="" onchange="updateValue(7, 1, this.value)"></td><td data-col="2" class="hidden-col"><input class="cell-input" type="text" value="" onchange="updateValue(7, 2, this.value)"></td></tr><tr data-row-key="moduleLength"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="moduleLength" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">模组总长</span></td><td data-col="0"><input class="cell-input" type="text" value="" onchange="updateValue(8, 0, this.value)"></td><td data-col="1" class="hidden-col"><input class="cell-input" type="text" value="" onchange="updateValue(8, 1, this.value)"></td><td data-col="2" class="hidden-col"><input class="cell-input" type="text" value="" onchange="updateValue(8, 2, this.value)"></td></tr><tr data-row-key="totalStroke"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="totalStroke" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">总行程</span></td><td data-col="0"><input class="cell-input" type="text" value="" onchange="updateValue(9, 0, this.value)"></td><td data-col="1" class="hidden-col"><input class="cell-input" type="text" value="" onchange="updateValue(9, 1, this.value)"></td><td data-col="2" class="hidden-col"><input class="cell-input" type="text" value="" onchange="updateValue(9, 2, this.value)"></td></tr><tr data-row-key="orderModel"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="orderModel" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">模组下单型号</span></td><td data-col="0"><input class="cell-input" type="text" value="" onchange="updateValue(10, 0, this.value)"></td><td data-col="1" class="hidden-col"><input class="cell-input" type="text" value="" onchange="updateValue(10, 1, this.value)"></td><td data-col="2" class="hidden-col"><input class="cell-input" type="text" value="" onchange="updateValue(10, 2, this.value)"></td></tr><tr data-row-key="motorModel"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="motorModel" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">电机型号</span></td><td data-col="0"><input class="cell-input" type="text" value="" onchange="updateValue(11, 0, this.value)"></td><td data-col="1" class="hidden-col"><input class="cell-input" type="text" value="" onchange="updateValue(11, 1, this.value)"></td><td data-col="2" class="hidden-col"><input class="cell-input" type="text" value="" onchange="updateValue(11, 2, this.value)"></td></tr><tr data-row-key="moverCount"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="moverCount" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">动子个数</span></td><td data-col="0"><input class="cell-input" type="text" value="" onchange="updateValue(12, 0, this.value)"></td><td data-col="1" class="hidden-col"><input class="cell-input" type="text" value="" onchange="updateValue(12, 1, this.value)"></td><td data-col="2" class="hidden-col"><input class="cell-input" type="text" value="" onchange="updateValue(12, 2, this.value)"></td></tr><tr data-row-key="driverModel"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="driverModel" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">驱动器型号</span></td><td data-col="0"><input class="cell-input" type="text" value="" onchange="updateValue(13, 0, this.value)"></td><td data-col="1" class="hidden-col"><input class="cell-input" type="text" value="" onchange="updateValue(13, 1, this.value)"></td><td data-col="2" class="hidden-col"><input class="cell-input" type="text" value="" onchange="updateValue(13, 2, this.value)"></td></tr><tr data-row-key="driverPower"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="driverPower" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">驱动器功率</span></td><td data-col="0"><input class="cell-input" type="text" value="" onchange="updateValue(14, 0, this.value)"></td><td data-col="1" class="hidden-col"><input class="cell-input" type="text" value="" onchange="updateValue(14, 1, this.value)"></td><td data-col="2" class="hidden-col"><input class="cell-input" type="text" value="" onchange="updateValue(14, 2, this.value)"></td></tr><tr data-row-key="photoelectric"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="photoelectric" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">光电</span></td><td data-col="0"><input class="cell-input" type="text" value="" onchange="updateValue(15, 0, this.value)"></td><td data-col="1" class="hidden-col"><input class="cell-input" type="text" value="" onchange="updateValue(15, 1, this.value)"></td><td data-col="2" class="hidden-col"><input class="cell-input" type="text" value="" onchange="updateValue(15, 2, this.value)"></td></tr><tr data-row-key="guideRail"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="guideRail" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">导轨</span></td><td data-col="0"><input class="cell-input" type="text" value="" onchange="updateValue(16, 0, this.value)"></td><td data-col="1" class="hidden-col"><input class="cell-input" type="text" value="" onchange="updateValue(16, 1, this.value)"></td><td data-col="2" class="hidden-col"><input class="cell-input" type="text" value="" onchange="updateValue(16, 2, this.value)"></td></tr><tr data-row-key="readHead"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="readHead" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">读头</span></td><td data-col="0"><input class="cell-input" type="text" value="" onchange="updateValue(17, 0, this.value)"></td><td data-col="1" class="hidden-col"><input class="cell-input" type="text" value="" onchange="updateValue(17, 1, this.value)"></td><td data-col="2" class="hidden-col"><input class="cell-input" type="text" value="" onchange="updateValue(17, 2, this.value)"></td></tr><tr data-row-key="powerLine"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="powerLine" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">动力线</span></td><td data-col="0"><input class="cell-input" type="text" value="" onchange="updateValue(18, 0, this.value)"></td><td data-col="1" class="hidden-col"><input class="cell-input" type="text" value="" onchange="updateValue(18, 1, this.value)"></td><td data-col="2" class="hidden-col"><input class="cell-input" type="text" value="" onchange="updateValue(18, 2, this.value)"></td></tr><tr data-row-key="encoderLine"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="encoderLine" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">编码器线</span></td><td data-col="0"><input class="cell-input" type="text" value="" onchange="updateValue(19, 0, this.value)"></td><td data-col="1" class="hidden-col"><input class="cell-input" type="text" value="" onchange="updateValue(19, 1, this.value)"></td><td data-col="2" class="hidden-col"><input class="cell-input" type="text" value="" onchange="updateValue(19, 2, this.value)"></td></tr><tr data-row-key="drawingSource"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="drawingSource" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">图纸来源</span></td><td data-col="0"><input class="cell-input" type="text" value="" onchange="updateValue(20, 0, this.value)"></td><td data-col="1" class="hidden-col"><input class="cell-input" type="text" value="" onchange="updateValue(20, 1, this.value)"></td><td data-col="2" class="hidden-col"><input class="cell-input" type="text" value="" onchange="updateValue(20, 2, this.value)"></td></tr><tr data-row-key="brakeResistor"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="brakeResistor" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">刹车电阻</span></td><td data-col="0"><input class="cell-input" type="text" value="" onchange="updateValue(21, 0, this.value)"></td><td data-col="1" class="hidden-col"><input class="cell-input" type="text" value="" onchange="updateValue(21, 1, this.value)"></td><td data-col="2" class="hidden-col"><input class="cell-input" type="text" value="" onchange="updateValue(21, 2, this.value)"></td></tr><tr data-row-key="other"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="other" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">其他</span></td><td data-col="0"><input class="cell-input" type="text" value="" onchange="updateValue(22, 0, this.value)"></td><td data-col="1" class="hidden-col"><input class="cell-input" type="text" value="" onchange="updateValue(22, 1, this.value)"></td><td data-col="2" class="hidden-col"><input class="cell-input" type="text" value="" onchange="updateValue(22, 2, this.value)"></td></tr></tbody>
+                <tbody id="tableBody"><tr><td class="col-filter">筛选</td><td class="col-label"><span class="row-label">参数</span></td><td data-col="0"><span class="edit-icon" title="编辑列" onclick="editColumn(0)">✎</span><span class="del-icon" title="删除列" onclick="deleteColumn(0)">✕</span></td><td data-col="1"><span class="edit-icon" title="编辑列" onclick="editColumn(1)">✎</span><span class="del-icon" title="删除列" onclick="deleteColumn(1)">✕</span></td><td data-col="2"><span class="edit-icon" title="编辑列" onclick="editColumn(2)">✎</span><span class="del-icon" title="删除列" onclick="deleteColumn(2)">✕</span></td></tr><tr data-row-key="sequence"><td class="col-filter"></td><td class="col-label"><span class="row-label">序列</span></td><td data-col="0" colspan="1"><span class="seq-num" onclick="openChangeModal(0)" title="点击新增变更">3</span></td><td data-col="1" colspan="1"><span class="seq-num" onclick="openChangeModal(1)" title="点击新增变更">2</span></td><td data-col="2" colspan="1"><span class="seq-num" onclick="openChangeModal(2)" title="点击新增变更">1</span></td></tr><tr data-row-key="date"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="date" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">建档日期</span></td><td data-col="0" colspan="1"><span style="font-weight:600;color:#333;">26/07/22</span></td><td data-col="1" colspan="1"><span style="font-weight:600;color:#333;">26/07/22</span></td><td data-col="2" colspan="1"><span style="font-weight:600;color:#333;">26/07/22</span></td></tr><tr data-row-key="customer"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="customer" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">客户</span></td><td data-col="0" colspan="1"><span style="font-weight:600;color:#333;"></span></td><td data-col="1" colspan="1"><span style="font-weight:600;color:#333;"></span></td><td data-col="2" colspan="1"><span style="font-weight:600;color:#333;"></span></td></tr><tr data-row-key="projectNo"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="projectNo" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">项目号</span></td><td data-col="0" colspan="1"><span style="font-weight:600;color:#333;"></span></td><td data-col="1" colspan="1"><span style="font-weight:600;color:#333;"></span></td><td data-col="2" colspan="1"><span style="font-weight:600;color:#333;"></span></td></tr><tr data-row-key="projectName"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="projectName" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">项目名称</span></td><td data-col="0" colspan="1"><span style="font-weight:600;color:#333;"></span></td><td data-col="1" colspan="1"><span style="font-weight:600;color:#333;"></span></td><td data-col="2" colspan="1"><span style="font-weight:600;color:#333;"></span></td></tr><tr data-row-key="engineer"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="engineer" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">工程师</span></td><td data-col="0" colspan="1"><span style="font-weight:600;color:#333;"></span></td><td data-col="1" colspan="1"><span style="font-weight:600;color:#333;"></span></td><td data-col="2" colspan="1"><span style="font-weight:600;color:#333;"></span></td></tr><tr data-row-key="changeTime"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="changeTime" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">变更时间</span></td><td data-col="0"><input class="cell-input" type="text" value="" onchange="updateValue(6, 0, this.value)"></td><td data-col="1"><input class="cell-input" type="text" value="" onchange="updateValue(6, 1, this.value)"></td><td data-col="2"><input class="cell-input" type="text" value="" onchange="updateValue(6, 2, this.value)"></td></tr><tr data-row-key="condition"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="condition" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">工况</span></td><td data-col="0"><input class="cell-input" type="text" value="" onchange="updateValue(7, 0, this.value)"></td><td data-col="1"><input class="cell-input" type="text" value="" onchange="updateValue(7, 1, this.value)"></td><td data-col="2"><input class="cell-input" type="text" value="" onchange="updateValue(7, 2, this.value)"></td></tr><tr data-row-key="moduleLength"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="moduleLength" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">模组总长</span></td><td data-col="0"><input class="cell-input" type="text" value="" onchange="updateValue(8, 0, this.value)"></td><td data-col="1"><input class="cell-input" type="text" value="" onchange="updateValue(8, 1, this.value)"></td><td data-col="2"><input class="cell-input" type="text" value="" onchange="updateValue(8, 2, this.value)"></td></tr><tr data-row-key="totalStroke"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="totalStroke" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">总行程</span></td><td data-col="0"><input class="cell-input" type="text" value="" onchange="updateValue(9, 0, this.value)"></td><td data-col="1"><input class="cell-input" type="text" value="" onchange="updateValue(9, 1, this.value)"></td><td data-col="2"><input class="cell-input" type="text" value="" onchange="updateValue(9, 2, this.value)"></td></tr><tr data-row-key="orderModel"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="orderModel" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">模组下单型号</span></td><td data-col="0"><input class="cell-input" type="text" value="" onchange="updateValue(10, 0, this.value)"></td><td data-col="1"><input class="cell-input" type="text" value="" onchange="updateValue(10, 1, this.value)"></td><td data-col="2"><input class="cell-input" type="text" value="" onchange="updateValue(10, 2, this.value)"></td></tr><tr data-row-key="motorModel"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="motorModel" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">电机型号</span></td><td data-col="0"><input class="cell-input" type="text" value="o" onchange="updateValue(11, 0, this.value)"></td><td data-col="1"><input class="cell-input" type="text" value="" onchange="updateValue(11, 1, this.value)"></td><td data-col="2"><input class="cell-input" type="text" value="" onchange="updateValue(11, 2, this.value)"></td></tr><tr data-row-key="moverCount"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="moverCount" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">动子个数</span></td><td data-col="0"><input class="cell-input" type="text" value="" onchange="updateValue(12, 0, this.value)"></td><td data-col="1"><input class="cell-input" type="text" value="" onchange="updateValue(12, 1, this.value)"></td><td data-col="2"><input class="cell-input" type="text" value="" onchange="updateValue(12, 2, this.value)"></td></tr><tr data-row-key="driverModel"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="driverModel" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">驱动器型号</span></td><td data-col="0"><input class="cell-input" type="text" value="" onchange="updateValue(13, 0, this.value)"></td><td data-col="1"><input class="cell-input" type="text" value="" onchange="updateValue(13, 1, this.value)"></td><td data-col="2"><input class="cell-input" type="text" value="" onchange="updateValue(13, 2, this.value)"></td></tr><tr data-row-key="driverPower"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="driverPower" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">驱动器功率</span></td><td data-col="0"><input class="cell-input" type="text" value="" onchange="updateValue(14, 0, this.value)"></td><td data-col="1"><input class="cell-input" type="text" value="" onchange="updateValue(14, 1, this.value)"></td><td data-col="2"><input class="cell-input" type="text" value="" onchange="updateValue(14, 2, this.value)"></td></tr><tr data-row-key="photoelectric"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="photoelectric" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">光电</span></td><td data-col="0"><input class="cell-input" type="text" value="" onchange="updateValue(15, 0, this.value)"></td><td data-col="1"><input class="cell-input" type="text" value="" onchange="updateValue(15, 1, this.value)"></td><td data-col="2"><input class="cell-input" type="text" value="" onchange="updateValue(15, 2, this.value)"></td></tr><tr data-row-key="guideRail"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="guideRail" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">导轨</span></td><td data-col="0"><input class="cell-input" type="text" value="" onchange="updateValue(16, 0, this.value)"></td><td data-col="1"><input class="cell-input" type="text" value="" onchange="updateValue(16, 1, this.value)"></td><td data-col="2"><input class="cell-input" type="text" value="" onchange="updateValue(16, 2, this.value)"></td></tr><tr data-row-key="readHead"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="readHead" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">读头</span></td><td data-col="0"><input class="cell-input" type="text" value="" onchange="updateValue(17, 0, this.value)"></td><td data-col="1"><input class="cell-input" type="text" value="" onchange="updateValue(17, 1, this.value)"></td><td data-col="2"><input class="cell-input" type="text" value="" onchange="updateValue(17, 2, this.value)"></td></tr><tr data-row-key="powerLine"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="powerLine" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">动力线</span></td><td data-col="0"><input class="cell-input" type="text" value="" onchange="updateValue(18, 0, this.value)"></td><td data-col="1"><input class="cell-input" type="text" value="" onchange="updateValue(18, 1, this.value)"></td><td data-col="2"><input class="cell-input" type="text" value="" onchange="updateValue(18, 2, this.value)"></td></tr><tr data-row-key="encoderLine"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="encoderLine" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">编码器线</span></td><td data-col="0"><input class="cell-input" type="text" value="" onchange="updateValue(19, 0, this.value)"></td><td data-col="1"><input class="cell-input" type="text" value="" onchange="updateValue(19, 1, this.value)"></td><td data-col="2"><input class="cell-input" type="text" value="" onchange="updateValue(19, 2, this.value)"></td></tr><tr data-row-key="drawingSource"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="drawingSource" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">图纸来源</span></td><td data-col="0"><input class="cell-input" type="text" value="" onchange="updateValue(20, 0, this.value)"></td><td data-col="1"><input class="cell-input" type="text" value="" onchange="updateValue(20, 1, this.value)"></td><td data-col="2"><input class="cell-input" type="text" value="" onchange="updateValue(20, 2, this.value)"></td></tr><tr data-row-key="brakeResistor"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="brakeResistor" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">刹车电阻</span></td><td data-col="0"><input class="cell-input" type="text" value="" onchange="updateValue(21, 0, this.value)"></td><td data-col="1"><input class="cell-input" type="text" value="" onchange="updateValue(21, 1, this.value)"></td><td data-col="2"><input class="cell-input" type="text" value="" onchange="updateValue(21, 2, this.value)"></td></tr><tr data-row-key="other"><td class="col-filter"><input class="filter-input" type="text" placeholder="筛选" data-row-key="other" oninput="applyFilters()"></td><td class="col-label"><span class="row-label">其他</span></td><td data-col="0"><input class="cell-input" type="text" value="" onchange="updateValue(22, 0, this.value)"></td><td data-col="1"><input class="cell-input" type="text" value="" onchange="updateValue(22, 1, this.value)"></td><td data-col="2"><input class="cell-input" type="text" value="" onchange="updateValue(22, 2, this.value)"></td></tr></tbody>
             </table>
         </div>
     </div>
 
     <!-- 应用状态容器：自动保存的表格数据，供 GitHub 同步读写 -->
-    <script type="application/json" id="xm-state">{"tableData":[{"key":"sequence","label":"序列","filterable":false,"values":["3","2","1"]},{"key":"date","label":"建档日期","filterable":true,"values":["26/07/22","26/07/22","26/07/22",""]},{"key":"customer","label":"客户","filterable":true,"values":["","","",""]},{"key":"projectNo","label":"项目号","filterable":true,"values":["","","",""]},{"key":"projectName","label":"项目名称","filterable":true,"values":["","","",""]},{"key":"engineer","label":"工程师","filterable":true,"values":["","","",""]},{"key":"changeTime","label":"变更时间","filterable":true,"values":["","","",""]},{"key":"condition","label":"工况","filterable":true,"values":["","","",""]},{"key":"moduleLength","label":"模组总长","filterable":true,"values":["","","",""]},{"key":"totalStroke","label":"总行程","filterable":true,"values":["","","",""]},{"key":"orderModel","label":"模组下单型号","filterable":true,"values":["","","",""]},{"key":"motorModel","label":"电机型号","filterable":true,"values":["o","","",""]},{"key":"moverCount","label":"动子个数","filterable":true,"values":["","","",""]},{"key":"driverModel","label":"驱动器型号","filterable":true,"values":["","","",""]},{"key":"driverPower","label":"驱动器功率","filterable":true,"values":["","","",""]},{"key":"photoelectric","label":"光电","filterable":true,"values":["","","",""]},{"key":"guideRail","label":"导轨","filterable":true,"values":["","","",""]},{"key":"readHead","label":"读头","filterable":true,"values":["","","",""]},{"key":"powerLine","label":"动力线","filterable":true,"values":["","","",""]},{"key":"encoderLine","label":"编码器线","filterable":true,"values":["","","",""]},{"key":"drawingSource","label":"图纸来源","filterable":true,"values":["","","",""]},{"key":"brakeResistor","label":"刹车电阻","filterable":true,"values":["","","",""]},{"key":"other","label":"其他","filterable":true,"values":["","","",""]}],"columnCount":3}</script>
+    <script type="application/json" id="xm-state">{"tableData":[{"key":"sequence","label":"序列","filterable":false,"values":["3","2","1"]},{"key":"date","label":"建档日期","filterable":true,"values":["26/07/22","26/07/22","26/07/22",""]},{"key":"customer","label":"客户","filterable":true,"values":["","","",""]},{"key":"projectNo","label":"项目号","filterable":true,"values":["","","",""]},{"key":"projectName","label":"项目名称","filterable":true,"values":["","","",""]},{"key":"engineer","label":"工程师","filterable":true,"values":["","","",""]},{"key":"changeTime","label":"变更时间","filterable":true,"values":["","","",""]},{"key":"condition","label":"工况","filterable":true,"values":["","","",""]},{"key":"moduleLength","label":"模组总长","filterable":true,"values":["","","",""]},{"key":"totalStroke","label":"总行程","filterable":true,"values":["","","",""]},{"key":"orderModel","label":"模组下单型号","filterable":true,"values":["","","",""]},{"key":"motorModel","label":"电机型号","filterable":true,"values":["50-M3-S1","","",""]},{"key":"moverCount","label":"动子个数","filterable":true,"values":["","","",""]},{"key":"driverModel","label":"驱动器型号","filterable":true,"values":["","","",""]},{"key":"driverPower","label":"驱动器功率","filterable":true,"values":["","","",""]},{"key":"photoelectric","label":"光电","filterable":true,"values":["","","",""]},{"key":"guideRail","label":"导轨","filterable":true,"values":["","","",""]},{"key":"readHead","label":"读头","filterable":true,"values":["","","",""]},{"key":"powerLine","label":"动力线","filterable":true,"values":["","","",""]},{"key":"encoderLine","label":"编码器线","filterable":true,"values":["","","",""]},{"key":"drawingSource","label":"图纸来源","filterable":true,"values":["","","",""]},{"key":"brakeResistor","label":"刹车电阻","filterable":true,"values":["","","",""]},{"key":"other","label":"其他","filterable":true,"values":["","","",""]}],"columnCount":3}</script>
 
     <!-- 顶部提示 toast -->
     <div class="toast" id="toast"></div>
-
-    <!-- GitHub 同步弹窗 -->
-    <div class="modal-overlay" id="ghModal">
-        <div class="modal">
-            <div class="modal-header">GitHub 同步设置</div>
-            <div class="modal-body">
-                <p class="gh-tip">已为你预填默认配置并<strong>开启自动同步</strong>：编辑后自动上传到 GitHub。配置保存在本机浏览器 (localStorage)；文件推送时会自动剥离内嵌 Token，避免泄露到仓库。如需更换，修改下方并点「保存配置」。</p>
-                <label class="gh-field">① 个人访问令牌 (Token)
-                    <input id="ghToken" type="password" placeholder="ghp_xxxxxxxx 或 github_pat_xxxx">
-                    <span class="gh-hint">GitHub → 右上角头像 → Settings → Developer settings → Personal access tokens → 勾选 repo 权限后生成</span>
-                </label>
-                <label class="gh-field">② 仓库所有者 (用户名 / 组织名)
-                    <input id="ghOwner" type="text" placeholder="例如 octocat">
-                    <span class="gh-hint">你的 GitHub 登录名，或仓库所属组织名</span>
-                </label>
-                <label class="gh-field">③ 仓库名称 (Repository)
-                    <input id="ghRepo" type="text" placeholder="例如 xm-tables">
-                    <span class="gh-hint">存放该 HTML 的仓库名（不含 .git）</span>
-                </label>
-                <label class="gh-field">④ 分支 (Branch)
-                    <input id="ghBranch" type="text" placeholder="main 或 master">
-                    <span class="gh-hint">默认填 main；若仓库主分支是 master 则填 master</span>
-                </label>
-                <label class="gh-field">⑤ 文件路径 (File Path)
-                    <input id="ghPath" type="text" placeholder="XM方案表-LT.html">
-                    <span class="gh-hint">文件在仓库中的路径；放在根目录直接填文件名即可（建议就用本文件名，这样任意设备打开文件即是最新数据）</span>
-                </label>
-                <label class="gh-field">⑥ 提交信息 (Commit Message)
-                    <input id="ghCommit" type="text" placeholder="XM方案表 同步更新">
-                    <span class="gh-hint">上传到 GitHub 时的提交说明，留空则用默认文案</span>
-                </label>
-                <label class="gh-check">
-                    <input id="ghAuto" type="checkbox"> 自动同步：编辑后自动静默上传到 GitHub（防抖 1.5 秒）
-                </label>
-                <div id="ghStatus" class="gh-status">⏳ 正在上传…</div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-default" onclick="closeGhModal()">关闭</button>
-                <button class="btn btn-default" onclick="saveGhConfigFromModal()">保存配置</button>
-                <button class="btn btn-default" onclick="pullFromGithub()">从GitHub下载</button>
-                <button class="btn btn-primary" onclick="pushToGithub()">上传到GitHub</button>
-            </div>
-        </div>
-    </div>
 
     <!-- 编辑列模态框 -->
     <div class="modal-overlay" id="editModal">
         <div class="modal">
             <div class="modal-header">编辑列内容</div>
             <div class="modal-body">
-                <div id="lockedRows" class="locked-area"><div class="locked-title">以下为锁定项（自动生成，不可修改）：</div><div class="locked-line"><span class="lk-label">序列</span><span class="lk-val">2</span></div><div class="locked-line"><span class="lk-label">建档日期</span><span class="lk-val">26/07/22</span></div><div class="locked-line"><span class="lk-label">客户</span><span class="lk-val"></span></div></div>
+                <div id="lockedRows" class="locked-area"></div>
                 <textarea id="editTextarea"></textarea>
             </div>
             <div class="modal-footer">
@@ -824,6 +776,7 @@
         let autoSyncTimer = null;
         function triggerAutoSync() {
             const cfg = loadGhConfig();
+            if (isAutoPulling) return;
             if (!cfg.autoSync) return;
             if (!cfg.token || !cfg.owner || !cfg.repo || !cfg.path) return;
             clearTimeout(autoSyncTimer);
@@ -855,10 +808,16 @@
             clearTimeout(toastTimer);
             toastTimer = setTimeout(() => { t.className = 'toast'; }, 2600);
         }
-        function setGhStatus(msg) {
-            const el = document.getElementById('ghStatus');
-            if (el) el.textContent = msg || '';
+        // GitHub 同步状态指示灯（灰=待同步 / 蓝=同步中 / 绿=成功 / 红=失败）
+        function setGhStatus(msg, type) {
+            const el = document.getElementById('syncIndicator');
+            if (!el) return;
+            el.textContent = msg || '';
+            el.className = 'sync-indicator' + (type ? ' sync-' + type : '');
         }
+
+        // 自动下载守卫：打开文件拉取期间，禁止触发自动上传
+        let isAutoPulling = false;
 
         // 配置读写：默认参数已内嵌（自动同步开），可被本机 localStorage 覆盖
         const GH_KEY = 'xm_gh_config';
@@ -880,36 +839,6 @@
             localStorage.setItem(GH_KEY, JSON.stringify(cfg));
         }
 
-        function openGhModal() {
-            const cfg = loadGhConfig();
-            document.getElementById('ghToken').value = cfg.token || '';
-            document.getElementById('ghOwner').value = cfg.owner || '';
-            document.getElementById('ghRepo').value = cfg.repo || '';
-            document.getElementById('ghBranch').value = cfg.branch || '';
-            document.getElementById('ghPath').value = cfg.path || 'XM方案表-LT.html';
-            document.getElementById('ghCommit').value = cfg.commit || 'XM方案表 同步更新';
-            document.getElementById('ghAuto').checked = !!cfg.autoSync;
-            setGhStatus('');
-            document.getElementById('ghModal').classList.add('show');
-        }
-        function closeGhModal() {
-            document.getElementById('ghModal').classList.remove('show');
-        }
-        function saveGhConfigFromModal() {
-            const cfg = {
-                token: document.getElementById('ghToken').value.trim(),
-                owner: document.getElementById('ghOwner').value.trim(),
-                repo: document.getElementById('ghRepo').value.trim(),
-                branch: document.getElementById('ghBranch').value.trim(),
-                path: document.getElementById('ghPath').value.trim() || 'XM方案表-LT.html',
-                commit: document.getElementById('ghCommit').value.trim() || 'XM方案表 同步更新',
-                autoSync: document.getElementById('ghAuto').checked
-            };
-            saveGhConfig(cfg);
-            setGhStatus('✅ 配置已保存到本机');
-            showToast('配置已保存', 'success');
-        }
-
         // 取得要同步的完整 HTML（含最新状态）；推送前剥离真实 Token，避免泄露到仓库
         function getSyncContent() {
             saveStateToDom();
@@ -925,14 +854,15 @@
             silent = silent || false;
             const cfg = loadGhConfig();
             if (!cfg.token || !cfg.owner || !cfg.repo || !cfg.path) {
-                if (!silent) { showToast('请先填写完整的 GitHub 配置并保存', 'error'); setGhStatus('❌ 配置不完整，请先「保存配置」'); }
+                setGhStatus('配置缺失', 'err');
+                if (!silent) showToast('同步配置缺失', 'error');
                 return;
             }
             const apiPath = encodeURIComponent(cfg.path);
             const url = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${apiPath}`;
             const headers = { 'Authorization': 'token ' + cfg.token, 'Accept': 'application/vnd.github+json' };
             try {
-                setGhStatus('⏳ 正在上传…');
+                setGhStatus('同步中…', 'ing');
                 // 先查是否已有文件（拿到 sha）
                 let sha = null;
                 const refQ = cfg.branch ? '?ref=' + encodeURIComponent(cfg.branch) : '';
@@ -960,10 +890,10 @@
                     const err = await putRes.json().catch(() => ({}));
                     throw new Error(err.message || ('上传失败 ' + putRes.status));
                 }
-                setGhStatus('✅ 已上传到 GitHub：' + cfg.path);
+                setGhStatus('已同步', 'ok');
                 if (!silent) showToast('上传成功', 'success');
             } catch (e) {
-                setGhStatus('❌ ' + e.message);
+                setGhStatus('同步失败', 'err');
                 showToast((silent ? '自动同步失败：' : '上传失败：') + e.message, 'error');
             }
         }
@@ -972,17 +902,18 @@
         async function pullFromGithub() {
             const cfg = loadGhConfig();
             if (!cfg.token || !cfg.owner || !cfg.repo || !cfg.path) {
-                showToast('请先填写完整的 GitHub 配置并保存', 'error');
-                setGhStatus('❌ 配置不完整，请先「保存配置」');
+                setGhStatus('配置缺失', 'err');
                 return;
             }
+            isAutoPulling = true;
             const apiPath = encodeURIComponent(cfg.path);
-            const url = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${apiPath}?ref=` + encodeURIComponent(cfg.branch);
+            const url = 'https://api.github.com/repos/' + cfg.owner + '/' + cfg.repo + '/contents/' + apiPath + (cfg.branch ? '?ref=' + encodeURIComponent(cfg.branch) : '');
             try {
-                setGhStatus('⏳ 正在下载…');
+                setGhStatus('下载中…', 'ing');
                 const res = await fetch(url, {
                     headers: { 'Authorization': 'token ' + cfg.token, 'Accept': 'application/vnd.github+json' }
                 });
+                if (res.status === 404) { setGhStatus('云端暂无数据', ''); return; }
                 if (!res.ok) {
                     const err = await res.json().catch(() => ({}));
                     throw new Error(err.message || ('下载失败 ' + res.status));
@@ -999,15 +930,18 @@
                 s.tableData.forEach(r => tableData.push(r));
                 if (typeof s.columnCount === 'number') columnCount = s.columnCount;
                 initTable();
-                setGhStatus('✅ 已从 GitHub 下载：' + cfg.path);
-                showToast('下载成功', 'success');
+                setGhStatus('已下载', 'ok');
             } catch (e) {
-                setGhStatus('❌ ' + e.message);
+                setGhStatus('下载失败', 'err');
                 showToast('下载失败：' + e.message, 'error');
+            } finally {
+                isAutoPulling = false;
             }
         }
 
         loadStateFromDom();
+        // 打开文件自动从 GitHub 下载最新数据
+        pullFromGithub();
     </script>
 
 
