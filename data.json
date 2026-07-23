@@ -83,6 +83,11 @@
   .toast.success { background: #07c160; }
   .toast.error { background: #ff4d4f; }
   .toast.info { background: #1a73e8; }
+  .gh-token-input {
+    padding: 7px 12px; border: 1px solid rgba(255,255,255,0.35); border-radius: 6px;
+    font-size: 13px; background: rgba(255,255,255,0.95); color: #333; width: 220px; outline: none;
+  }
+  .gh-token-input:focus { border-color: #fff; box-shadow: 0 0 0 2px rgba(255,255,255,0.4); }
 </style>
 </head>
 <body>
@@ -91,7 +96,8 @@
   <h1>XM方案明细</h1>
   <div class="actions">
     <span id="syncStatus" class="sync-status syncing"><span class="sync-dot"></span><span id="syncText">同步中...</span></span>
-    <button class="btn btn-outline" style="background:#fff;color:#333;" onclick="openSettings()">⚙️ 设置</button>
+    <input type="password" id="ghTokenInput" class="gh-token-input" placeholder="GitHub Token (ghp_...)">
+    <button class="btn btn-success" id="downloadBtn" onclick="downloadFromGitHub()">📥 从 GitHub 下载</button>
     <button class="btn btn-primary" id="syncBtn" onclick="syncToGitHub()" disabled="">⏳ 同步中...</button>
   </div>
 </div>
@@ -131,39 +137,15 @@
           <th>其他</th>
         </tr>
       </thead>
-      <tbody id="tableBody"><tr><td><button class="del-btn">删除</button></td><td style="cursor: pointer;">2</td><td style="cursor: pointer;">2026/7/23 22:45:34</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;">2026/7/23 22:45:34</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td></tr><tr><td><button class="del-btn">删除</button></td><td style="cursor: pointer;">1</td><td style="cursor: pointer;">2026/7/23 22:45:33</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;">2026/7/23 22:45:33</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td></tr></tbody>
+      <tbody id="tableBody"><tr><td><button class="del-btn">删除</button></td><td style="cursor: pointer;">3</td><td style="cursor: pointer;">2026/7/23 22:51:00</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;">2026/7/23 22:51:00</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td></tr><tr><td><button class="del-btn">删除</button></td><td style="cursor: pointer;">2</td><td style="cursor: pointer;">2026/7/23 22:45:34</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;">2026/7/23 22:45:34</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td></tr><tr><td><button class="del-btn">删除</button></td><td style="cursor: pointer;">1</td><td style="cursor: pointer;">2026/7/23 22:45:33</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;">2026/7/23 22:45:33</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td></tr></tbody>
     </table>
   </div>
 </div>
 
-<!-- GitHub 设置弹窗 -->
-<div class="modal" id="settingsModal">
-  <div class="modal-box">
-    <h3>⚙️ GitHub 同步设置</h3>
-    <label>GitHub 用户名</label>
-    <input type="text" id="ghUser" placeholder="输入 GitHub 用户名">
-    <label>仓库名称 (Repo)</label>
-    <input type="text" id="ghRepo" placeholder="例如: OPP3">
-    <label>GitHub Token</label>
-    <input type="password" id="ghToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
-    <div class="hint">需要 repo 权限。Token 将保存在浏览器本地存储中。</div>
-    <label>仓库内文件路径</label>
-    <input type="text" id="ghFilePath" placeholder="例如: XM方案明细.html" value="XM方案明细.html">
-    <label>提交信息</label>
-    <input type="text" id="ghCommitMsg" placeholder="Update XM方案明细" value="Update XM方案明细">
-    <button class="btn btn-outline" onclick="testGitHubConnection()" style="width:100%;margin-top:14px;justify-content:center;">🔗 测试连接</button>
-    <div id="testResult"><div class="test-result success">✅ 连接成功！仓库存在且 Token 有效。</div></div>
-    <div class="modal-actions">
-      <button class="btn btn-outline" onclick="closeSettings()">取消</button>
-      <button class="btn btn-primary" onclick="saveGitHubSettings()">💾 保存设置</button>
-    </div>
-  </div>
-</div>
-
-<div id="toast" class="toast success show">GitHub 设置已保存</div>
+<div id="toast" class="toast success">✅ 已从 GitHub 下载 2 条</div>
 
 <!-- 数据持久化脚本：同步时会先更新此处的 rawData，再提交整个 HTML 文件 -->
-<script id="xmData">var rawData = [{"序列":2,"建档日期":"2026/7/23 22:45:34","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/23 22:45:34","工况":"","型号":"","配置":"","其他":""},{"序列":1,"建档日期":"2026/7/23 22:45:33","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/23 22:45:33","工况":"","型号":"","配置":"","其他":""}];</script>
+<script id="xmData">var rawData = [{"序列":3,"建档日期":"2026/7/23 22:51:00","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/23 22:51:00","工况":"","型号":"","配置":"","其他":""},{"序列":2,"建档日期":"2026/7/23 22:45:34","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/23 22:45:34","工况":"","型号":"","配置":"","其他":""},{"序列":1,"建档日期":"2026/7/23 22:45:33","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/23 22:45:33","工况":"","型号":"","配置":"","其他":""}];</script>
 
 <script>
 // ==================== 列定义 ====================
@@ -309,8 +291,8 @@ function persistData() {
   document.getElementById('xmData').textContent = 'var rawData = ' + JSON.stringify(rawData) + ';';
 }
 
-// ==================== GitHub设置 ====================
-// 默认配置取自 XM方案明细（项目资产），首次加载自动填入
+// ==================== GitHub 配置 ====================
+// 默认仓库/文件路径取自 XM方案明细（项目资产）。Token 仅通过头部输入框填入，不写入文件内容。
 var DEFAULT_GH = {
   user: 'maidang0706',
   repo: 'OPP3',
@@ -327,72 +309,20 @@ function loadGitHubSettings() {
       localStorage.setItem('xm_github_settings', saved);
     }
     var s = JSON.parse(saved);
-    document.getElementById('ghUser').value = s.user || '';
-    document.getElementById('ghRepo').value = s.repo || '';
-    document.getElementById('ghToken').value = s.token || '';
-    document.getElementById('ghFilePath').value = s.filePath || 'XM方案明细.html';
-    document.getElementById('ghCommitMsg').value = s.commitMsg || 'Update XM方案明细';
+    // 预填头部 Token 输入框（若存在已保存的 token）
+    document.getElementById('ghTokenInput').value = s.token || '';
     updateSyncStatus('idle', '已配置');
   } catch (e) {}
 }
 
-function openSettings() {
-  loadGitHubSettings();
-  document.getElementById('testResult').innerHTML = '';
-  document.getElementById('settingsModal').classList.add('show');
-}
-
-function closeSettings() {
-  document.getElementById('settingsModal').classList.remove('show');
-}
-
-function saveGitHubSettings() {
-  var s = {
-    user: document.getElementById('ghUser').value.trim(),
-    repo: document.getElementById('ghRepo').value.trim(),
-    token: document.getElementById('ghToken').value.trim(),
-    filePath: document.getElementById('ghFilePath').value.trim() || 'XM方案明细.html',
-    commitMsg: document.getElementById('ghCommitMsg').value.trim() || 'Update XM方案明细'
-  };
-  if (!s.user || !s.repo || !s.token) {
-    showToast('请填写 GitHub 用户名、仓库名和 Token', 'error');
-    return;
-  }
-  localStorage.setItem('xm_github_settings', JSON.stringify(s));
-  closeSettings();
-  updateSyncStatus('idle', '已配置');
-  showToast('GitHub 设置已保存', 'success');
-}
-
+// 读取当前配置：user/repo/filePath 用默认值，token 取头部输入框（并持久化以便下次自动填入）
 function getGitHubSettings() {
-  try {
-    var saved = localStorage.getItem('xm_github_settings');
-    return saved ? JSON.parse(saved) : null;
-  } catch (e) { return null; }
-}
-
-async function testGitHubConnection() {
-  var user = document.getElementById('ghUser').value.trim();
-  var repo = document.getElementById('ghRepo').value.trim();
-  var token = document.getElementById('ghToken').value.trim();
-  if (!user || !repo || !token) {
-    document.getElementById('testResult').innerHTML = '<div class="test-result fail">请填写完整的 GitHub 信息</div>';
-    return;
-  }
-  document.getElementById('testResult').innerHTML = '<div class="test-result" style="background:#fff3e0;color:#e65100;">正在测试连接...</div>';
-  try {
-    var resp = await fetch('https://api.github.com/repos/' + encodeURIComponent(user) + '/' + encodeURIComponent(repo), {
-      headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github.v3+json' }
-    });
-    if (resp.ok) {
-      document.getElementById('testResult').innerHTML = '<div class="test-result success">✅ 连接成功！仓库存在且 Token 有效。</div>';
-    } else {
-      var data = await resp.json();
-      document.getElementById('testResult').innerHTML = '<div class="test-result fail">❌ 连接失败: ' + (data.message || '未知错误') + '</div>';
-    }
-  } catch (e) {
-    document.getElementById('testResult').innerHTML = '<div class="test-result fail">❌ 网络错误: ' + e.message + '</div>';
-  }
+  var saved = localStorage.getItem('xm_github_settings');
+  var s = saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(DEFAULT_GH));
+  var token = document.getElementById('ghTokenInput').value.trim();
+  s.token = token;
+  if (token) localStorage.setItem('xm_github_settings', JSON.stringify(s));
+  return s;
 }
 
 // ==================== GitHub同步 ====================
@@ -406,9 +336,8 @@ function updateSyncStatus(status, text) {
 
 async function syncToGitHub() {
   var settings = getGitHubSettings();
-  if (!settings) {
-    showToast('请先点击 ⚙️ 设置 配置 GitHub 信息', 'error');
-    openSettings();
+  if (!settings.user || !settings.repo || !settings.token) {
+    showToast('请先在右上角输入 GitHub Token', 'error');
     return;
   }
   updateSyncStatus('syncing', '同步中...');
@@ -470,7 +399,53 @@ async function syncToGitHub() {
 var _syncTimer = null;
 function scheduleSync() {
   clearTimeout(_syncTimer);
+  var token = document.getElementById('ghTokenInput').value.trim();
+  if (!token) return; // 未填 Token 时不自动同步
   _syncTimer = setTimeout(function () { syncToGitHub(); }, 1500);
+}
+
+// ==================== 从 GitHub 下载 ====================
+async function downloadFromGitHub() {
+  var settings = getGitHubSettings();
+  if (!settings.user || !settings.repo || !settings.token) {
+    showToast('请先在右上角输入 GitHub Token', 'error');
+    return;
+  }
+  updateSyncStatus('syncing', '下载中...');
+  var btn = document.getElementById('downloadBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ 下载中...';
+  try {
+    var url = 'https://api.github.com/repos/' + encodeURIComponent(settings.user) + '/' + encodeURIComponent(settings.repo) + '/contents/' + encodeURIComponent(settings.filePath);
+    var headers = { 'Authorization': 'token ' + settings.token, 'Accept': 'application/vnd.github.v3+json' };
+    var resp = await fetch(url, { headers: headers });
+    if (!resp.ok) {
+      var err = await resp.json().catch(function(){return {};});
+      updateSyncStatus('error', '下载失败');
+      showToast('❌ 下载失败: ' + (err.message || '未知错误'), 'error');
+      return;
+    }
+    var data = await resp.json();
+    var htmlStr = decodeURIComponent(escape(atob(data.content.replace(/\s/g, ''))));
+    // 提取仓库文件中的 rawData
+    var m = htmlStr.match(/<script id="xmData">([\s\S]*?)<\/script>/);
+    if (!m) {
+      updateSyncStatus('error', '下载失败');
+      showToast('❌ 文件中未找到数据', 'error');
+      return;
+    }
+    var newData = new Function(m[1] + '\n; return rawData;')();
+    if (!Array.isArray(newData)) throw new Error('数据格式错误');
+    rawData = newData;
+    render();
+    updateSyncStatus('idle', '已同步');
+    showToast('✅ 已从 GitHub 下载 ' + rawData.length + ' 条', 'success');
+  } catch (e) {
+    updateSyncStatus('error', '下载失败');
+    showToast('❌ 下载失败: ' + e.message, 'error');
+  }
+  btn.disabled = false;
+  btn.textContent = '📥 从 GitHub 下载';
 }
 
 // ==================== Toast ====================
@@ -485,11 +460,6 @@ function showToast(msg, type) {
 // ==================== 初始化 ====================
 loadGitHubSettings();
 render();
-
-// 点击弹窗外部关闭
-document.getElementById('settingsModal').addEventListener('click', function (e) {
-  if (e.target === this) closeSettings();
-});
 </script>
 
 
