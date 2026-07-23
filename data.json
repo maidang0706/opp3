@@ -74,8 +74,11 @@
   .test-result { font-size: 13px; padding: 8px 10px; border-radius: 6px; margin-top: 10px; }
   .test-result.success { background: #e8f8ef; color: #07c160; }
   .test-result.fail { background: #fdeaea; color: #ff4d4f; }
-  .seq-cell { color: #1a73e8; font-weight: 600; cursor: pointer; text-decoration: underline; text-decoration-style: dashed; }
+  .seq-cell { color: #1a73e8; font-weight: 600; cursor: pointer; text-decoration: underline; text-decoration-style: dashed; vertical-align: middle; text-align: center; }
   .seq-cell:hover { background: #eaf2ff; }
+  /* 偶数序列号方案：浅黄背景（覆盖合并单元格默认的浅灰背景） */
+  tr.row-even td { background: #fff9c4 !important; }
+  tr.row-even td.seq-cell:hover { background: #eaf2ff !important; }
   .merge-cell { background: #fafbfc; vertical-align: middle; }
   .readonly-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 12px; margin-bottom: 4px; }
   .ro-item label { font-size: 12px; color: #888; margin: 0 0 2px; }
@@ -135,7 +138,7 @@
           <th>其他</th>
         </tr>
       </thead>
-      <tbody id="tableBody"><tr><td><button class="del-btn">删除</button></td><td class="seq-cell">5</td><td rowspan="2" class="merge-cell" style="cursor: pointer;">2026/7/23 23:13:18</td><td rowspan="2" class="merge-cell" style="cursor: pointer;">中基</td><td rowspan="2" class="merge-cell" style="cursor: pointer;"></td><td rowspan="2" class="merge-cell" style="cursor: pointer;">清陶</td><td rowspan="2" class="merge-cell" style="cursor: pointer;">AAA</td><td style="cursor: pointer;">2026/7/23 23:14:09</td><td style="cursor: pointer;"></td><td style="cursor: pointer;">EH140-25-M3</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td></tr><tr><td><button class="del-btn">删除</button></td><td class="seq-cell">5</td><td style="cursor: pointer;">2026/7/23 23:13:18</td><td style="cursor: pointer;"></td><td style="cursor: pointer;">EL170-25-M3</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td></tr><tr><td><button class="del-btn">删除</button></td><td class="seq-cell">2</td><td rowspan="1" class="merge-cell" style="cursor: pointer;">2026/7/23 22:45:34</td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td style="cursor: pointer;">2026/7/23 22:45:34</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td></tr><tr><td><button class="del-btn">删除</button></td><td class="seq-cell">1</td><td rowspan="1" class="merge-cell" style="cursor: pointer;">2026/7/23 22:45:33</td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td style="cursor: pointer;">2026/7/23 22:45:33</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td></tr></tbody>
+      <tbody id="tableBody"><tr class="row-even"><td><button class="del-btn">删除</button></td><td class="seq-cell" rowspan="1">6</td><td rowspan="1" class="merge-cell" style="cursor: pointer;">2026/7/23 23:26:20</td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td style="cursor: pointer;">2026/7/23 23:26:20</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td></tr><tr><td><button class="del-btn">删除</button></td><td class="seq-cell" rowspan="2">5</td><td rowspan="2" class="merge-cell" style="cursor: pointer;">2026/7/23 23:13:18</td><td rowspan="2" class="merge-cell" style="cursor: pointer;">中基</td><td rowspan="2" class="merge-cell" style="cursor: pointer;"></td><td rowspan="2" class="merge-cell" style="cursor: pointer;">清陶</td><td rowspan="2" class="merge-cell" style="cursor: pointer;">AAA</td><td style="cursor: pointer;">2026/7/23 23:14:09</td><td style="cursor: pointer;"></td><td style="cursor: pointer;">EH140-25-M3</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td></tr><tr><td><button class="del-btn">删除</button></td><td style="cursor: pointer;">2026/7/23 23:13:18</td><td style="cursor: pointer;"></td><td style="cursor: pointer;">EL170-25-M3</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td></tr><tr class="row-even"><td><button class="del-btn">删除</button></td><td class="seq-cell" rowspan="1">2</td><td rowspan="1" class="merge-cell" style="cursor: pointer;">2026/7/23 22:45:34</td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td style="cursor: pointer;">2026/7/23 22:45:34</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td></tr><tr><td><button class="del-btn">删除</button></td><td class="seq-cell" rowspan="1">1</td><td rowspan="1" class="merge-cell" style="cursor: pointer;">2026/7/23 22:45:33</td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td style="cursor: pointer;">2026/7/23 22:45:33</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td></tr></tbody>
     </table>
   </div>
 </div>
@@ -143,14 +146,14 @@
 <!-- 新增变更弹窗 -->
 <div class="modal" id="changeModal">
   <div class="modal-box">
-    <h3>🔧 新增变更 · 方案 #<span id="chPlanId">5</span></h3>
+    <h3>🔧 新增变更 · 方案 #<span id="chPlanId"></span></h3>
     <div class="readonly-grid">
-      <div class="ro-item"><label>序列</label><div id="chSeq" class="ro-val">5</div></div>
-      <div class="ro-item"><label>建档日期</label><div id="chDate" class="ro-val">2026/7/23 23:13:18</div></div>
-      <div class="ro-item"><label>客户</label><div id="chCustomer" class="ro-val">中基</div></div>
+      <div class="ro-item"><label>序列</label><div id="chSeq" class="ro-val"></div></div>
+      <div class="ro-item"><label>建档日期</label><div id="chDate" class="ro-val"></div></div>
+      <div class="ro-item"><label>客户</label><div id="chCustomer" class="ro-val"></div></div>
       <div class="ro-item"><label>项目号</label><div id="chProjNo" class="ro-val"></div></div>
-      <div class="ro-item"><label>项目名称</label><div id="chProjName" class="ro-val">清陶</div></div>
-      <div class="ro-item"><label>工程师</label><div id="chEngineer" class="ro-val">AAA</div></div>
+      <div class="ro-item"><label>项目名称</label><div id="chProjName" class="ro-val"></div></div>
+      <div class="ro-item"><label>工程师</label><div id="chEngineer" class="ro-val"></div></div>
     </div>
     <label>变更时间（自动生成）</label>
     <input type="text" id="chChangeTime" readonly="">
@@ -169,16 +172,29 @@
   </div>
 </div>
 
-<div id="toast" class="toast success show">✅ 已为方案 #5 新增变更</div>
+<div id="toast" class="toast"></div>
 
 <!-- 数据持久化脚本：同步时会先更新此处的 rawData，再提交整个 HTML 文件 -->
-<script id="xmData">var rawData = [{"序列":5,"建档日期":"2026/7/23 23:13:18","客户":"中基","项目号":"","项目名称":"清陶","工程师":"AAA","变更时间":"2026/7/23 23:14:09","工况":"","型号":"EH140-25-M3","配置":"","其他":""},{"序列":5,"建档日期":"2026/7/23 23:13:18","客户":"中基","项目号":"","项目名称":"清陶","工程师":"AAA","变更时间":"2026/7/23 23:13:18","工况":"","型号":"EL170-25-M3","配置":"","其他":""},{"序列":2,"建档日期":"2026/7/23 22:45:34","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/23 22:45:34","工况":"","型号":"","配置":"","其他":""},{"序列":1,"建档日期":"2026/7/23 22:45:33","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/23 22:45:33","工况":"","型号":"","配置":"","其他":""}];</script>
+<script id="xmData">var rawData = [{"序列":6,"建档日期":"2026/7/23 23:26:20","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/23 23:26:20","工况":"","型号":"","配置":"","其他":""},{"序列":5,"建档日期":"2026/7/23 23:13:18","客户":"中基","项目号":"","项目名称":"清陶","工程师":"AAA","变更时间":"2026/7/23 23:14:09","工况":"","型号":"EH140-25-M3","配置":"","其他":""},{"序列":5,"建档日期":"2026/7/23 23:13:18","客户":"中基","项目号":"","项目名称":"清陶","工程师":"AAA","变更时间":"2026/7/23 23:13:18","工况":"","型号":"EL170-25-M3","配置":"","其他":""},{"序列":2,"建档日期":"2026/7/23 22:45:34","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/23 22:45:34","工况":"","型号":"","配置":"","其他":""},{"序列":1,"建档日期":"2026/7/23 22:45:33","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/23 22:45:33","工况":"","型号":"","配置":"","其他":""}];</script>
 
 <script>
 // ==================== 列定义 ====================
 var allColumns = ["序列", "建档日期", "客户", "项目号", "项目名称", "工程师", "变更时间", "工况", "型号", "配置", "其他"];
 // 同一方案的固定列（同一序列号的多条变更合并显示）
-var MERGE_COLS = ["建档日期", "客户", "项目号", "项目名称", "工程师"];
+var MERGE_COLS = ["序列", "建档日期", "客户", "项目号", "项目名称", "工程师"];
+
+// 重新连续编号：同一方案（序列号相同）共享一个编号，删除方案后剩余方案按当前顺序编为 1,2,3...
+function renumberSchemes() {
+  var counter = 0;
+  var currentSeq = null;
+  rawData.forEach(function (r) {
+    if (String(r['序列']) !== String(currentSeq)) {
+      counter++;
+      currentSeq = r['序列'];
+    }
+    r['序列'] = counter;
+  });
+}
 
 // ==================== 渲染 ====================
 var tableBody = document.getElementById('tableBody');
@@ -203,6 +219,9 @@ function render() {
   });
   list.forEach(function (item, idx) {
     var tr = document.createElement('tr');
+    // 偶数序列号的方案行使用浅黄背景，便于区分
+    var _seqNum = parseInt(item['序列'], 10);
+    if (!isNaN(_seqNum) && _seqNum % 2 === 0) tr.className = 'row-even';
     // 删除按钮
     var tdOp = document.createElement('td');
     var del = document.createElement('button');
@@ -219,8 +238,9 @@ function render() {
       var val = item[col];
       td.textContent = (val === '' || val === null || val === undefined) ? '' : val;
       if (col === '序列') {
-        // 序列列：点击弹出「新增变更」对话框
+        // 序列列：同一方案合并显示，点击弹出「新增变更」对话框
         td.className = 'seq-cell';
+        td.rowSpan = item._span;
         td.onclick = (function (rowIdx) { return function () { openChangeDialog(rowIdx); }; })(item.__idx);
       } else if (MERGE_COLS.indexOf(col) !== -1) {
         // 合并列：起始行带 rowspan，可点击编辑（编辑会同步到该方案所有变更）
@@ -283,7 +303,7 @@ function finishEdit(td, rowIdx, col, val) {
 }
 
 // ==================== 增删 ====================
-// 序列 = 方案编号（稳定 ID，同一方案的多条变更共享同一编号，不随增删变动）
+// 序列 = 方案编号（同一方案的多条变更共享同一编号；新增取最大号+1，删除方案后由 renumberSchemes 重新连续编号）
 function addRow() {
   var now = new Date().toLocaleString('zh-CN');
   var maxSeq = 0;
@@ -302,6 +322,7 @@ function addRow() {
 function deleteRow(idx) {
   if (!confirm('确定删除这条记录吗？')) return;
   rawData.splice(idx, 1);
+  renumberSchemes(); // 删除方案后，剩余方案重新连续编号
   persistData();
   render();
   scheduleSync();
