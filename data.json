@@ -138,7 +138,7 @@
           <th>其他</th>
         </tr>
       </thead>
-      <tbody id="tableBody"><tr><td><button class="del-btn">删除</button></td><td class="seq-cell" rowspan="1">1</td><td rowspan="1" class="merge-cell" style="cursor: pointer;">2026/7/23 23:26:34</td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td style="cursor: pointer;">2026/7/23 23:26:34</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td></tr><tr class="row-even"><td><button class="del-btn">删除</button></td><td class="seq-cell" rowspan="1">2</td><td rowspan="1" class="merge-cell" style="cursor: pointer;">2026/7/23 23:26:20</td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td style="cursor: pointer;">2026/7/23 23:26:20</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td></tr><tr><td><button class="del-btn">删除</button></td><td class="seq-cell" rowspan="2">3</td><td rowspan="2" class="merge-cell" style="cursor: pointer;">2026/7/23 23:13:18</td><td rowspan="2" class="merge-cell" style="cursor: pointer;">中基</td><td rowspan="2" class="merge-cell" style="cursor: pointer;"></td><td rowspan="2" class="merge-cell" style="cursor: pointer;">清陶</td><td rowspan="2" class="merge-cell" style="cursor: pointer;">AAA</td><td style="cursor: pointer;">2026/7/23 23:14:09</td><td style="cursor: pointer;"></td><td style="cursor: pointer;">EH140-25-M3</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td></tr><tr><td><button class="del-btn">删除</button></td><td style="cursor: pointer;">2026/7/23 23:13:18</td><td style="cursor: pointer;"></td><td style="cursor: pointer;">EL170-25-M3</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td></tr><tr class="row-even"><td><button class="del-btn">删除</button></td><td class="seq-cell" rowspan="1">4</td><td rowspan="1" class="merge-cell" style="cursor: pointer;">2026/7/23 22:45:33</td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td style="cursor: pointer;">2026/7/23 22:45:33</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td></tr></tbody>
+      <tbody id="tableBody"><tr class="row-even"><td><button class="del-btn">删除</button></td><td class="seq-cell" rowspan="1">2</td><td rowspan="1" class="merge-cell" style="cursor: pointer;">2026/7/23 23:26:20</td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td style="cursor: pointer;">2026/7/23 23:26:20</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td></tr><tr><td><button class="del-btn">删除</button></td><td class="seq-cell" rowspan="2">1</td><td rowspan="2" class="merge-cell" style="cursor: pointer;">2026/7/23 23:13:18</td><td rowspan="2" class="merge-cell" style="cursor: pointer;">中基</td><td rowspan="2" class="merge-cell" style="cursor: pointer;"></td><td rowspan="2" class="merge-cell" style="cursor: pointer;">清陶</td><td rowspan="2" class="merge-cell" style="cursor: pointer;">AAA</td><td style="cursor: pointer;">2026/7/23 23:14:09</td><td style="cursor: pointer;"></td><td style="cursor: pointer;">EH140-25-M3</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td></tr><tr><td><button class="del-btn">删除</button></td><td style="cursor: pointer;">2026/7/23 23:13:18</td><td style="cursor: pointer;"></td><td style="cursor: pointer;">EL170-25-M3</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td></tr></tbody>
     </table>
   </div>
 </div>
@@ -172,10 +172,10 @@
   </div>
 </div>
 
-<div id="toast" class="toast success show">✅ 同步成功！https://github.com/maidang0706/opp3/blob/main/data.json</div>
+<div id="toast" class="toast"></div>
 
 <!-- 数据持久化脚本：同步时会先更新此处的 rawData，再提交整个 HTML 文件 -->
-<script id="xmData">var rawData = [{"序列":1,"建档日期":"2026/7/23 23:26:34","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/23 23:26:34","工况":"","型号":"","配置":"","其他":""},{"序列":2,"建档日期":"2026/7/23 23:26:20","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/23 23:26:20","工况":"","型号":"","配置":"","其他":""},{"序列":3,"建档日期":"2026/7/23 23:13:18","客户":"中基","项目号":"","项目名称":"清陶","工程师":"AAA","变更时间":"2026/7/23 23:14:09","工况":"","型号":"EH140-25-M3","配置":"","其他":""},{"序列":3,"建档日期":"2026/7/23 23:13:18","客户":"中基","项目号":"","项目名称":"清陶","工程师":"AAA","变更时间":"2026/7/23 23:13:18","工况":"","型号":"EL170-25-M3","配置":"","其他":""},{"序列":4,"建档日期":"2026/7/23 22:45:33","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/23 22:45:33","工况":"","型号":"","配置":"","其他":""}];</script>
+<script id="xmData">var rawData = [{"序列":2,"建档日期":"2026/7/23 23:26:20","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/23 23:26:20","工况":"","型号":"","配置":"","其他":""},{"序列":1,"建档日期":"2026/7/23 23:13:18","客户":"中基","项目号":"","项目名称":"清陶","工程师":"AAA","变更时间":"2026/7/23 23:14:09","工况":"","型号":"EH140-25-M3","配置":"","其他":""},{"序列":1,"建档日期":"2026/7/23 23:13:18","客户":"中基","项目号":"","项目名称":"清陶","工程师":"AAA","变更时间":"2026/7/23 23:13:18","工况":"","型号":"EL170-25-M3","配置":"","其他":""}];</script>
 
 <script>
 // ==================== 列定义 ====================
@@ -183,17 +183,18 @@ var allColumns = ["序列", "建档日期", "客户", "项目号", "项目名称
 // 同一方案的固定列（同一序列号的多条变更合并显示）
 var MERGE_COLS = ["序列", "建档日期", "客户", "项目号", "项目名称", "工程师"];
 
-// 重新连续编号：同一方案（序列号相同）共享一个编号，删除方案后剩余方案按当前顺序编为 1,2,3...
+// 重新连续编号：同一方案（序列号相同）共享一个编号；自底向上编号，使最小的序列号在表格最下方，依次向上递增
 function renumberSchemes() {
   var counter = 0;
   var currentSeq = null;
-  rawData.forEach(function (r) {
+  for (var i = rawData.length - 1; i >= 0; i--) {
+    var r = rawData[i];
     if (String(r['序列']) !== String(currentSeq)) {
       counter++;
       currentSeq = r['序列'];
     }
     r['序列'] = counter;
-  });
+  }
 }
 
 // ==================== 渲染 ====================
