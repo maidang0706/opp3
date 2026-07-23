@@ -76,6 +76,7 @@
   .test-result.fail { background: #fdeaea; color: #ff4d4f; }
   .seq-cell { color: #1a73e8; font-weight: 600; cursor: pointer; text-decoration: underline; text-decoration-style: dashed; }
   .seq-cell:hover { background: #eaf2ff; }
+  .merge-cell { background: #fafbfc; vertical-align: middle; }
   .readonly-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 12px; margin-bottom: 4px; }
   .ro-item label { font-size: 12px; color: #888; margin: 0 0 2px; }
   .ro-val { font-size: 13px; color: #333; background: #f5f6f8; border-radius: 6px; padding: 6px 8px; min-height: 16px; word-break: break-all; }
@@ -134,7 +135,7 @@
           <th>其他</th>
         </tr>
       </thead>
-      <tbody id="tableBody"><tr><td><button class="del-btn">删除</button></td><td class="seq-cell">4</td><td style="cursor: pointer;">2026/7/23 22:51:14</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;">2026/7/23 23:08:33</td><td style="cursor: pointer;">啊啊啊</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td></tr><tr><td><button class="del-btn">删除</button></td><td class="seq-cell">4</td><td style="cursor: pointer;">2026/7/23 22:51:14</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;">2026/7/23 22:51:14</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td></tr><tr><td><button class="del-btn">删除</button></td><td class="seq-cell">3</td><td style="cursor: pointer;">2026/7/23 22:51:00</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;">2026/7/23 22:51:00</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td></tr><tr><td><button class="del-btn">删除</button></td><td class="seq-cell">2</td><td style="cursor: pointer;">2026/7/23 22:45:34</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;">2026/7/23 22:45:34</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td></tr><tr><td><button class="del-btn">删除</button></td><td class="seq-cell">1</td><td style="cursor: pointer;">2026/7/23 22:45:33</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;">2026/7/23 22:45:33</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td></tr></tbody>
+      <tbody id="tableBody"><tr><td><button class="del-btn">删除</button></td><td class="seq-cell">4</td><td rowspan="1" class="merge-cell" style="cursor: pointer;">2026/7/23 22:51:14</td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td style="cursor: pointer;">2026/7/23 22:51:14</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td></tr><tr><td><button class="del-btn">删除</button></td><td class="seq-cell">3</td><td rowspan="1" class="merge-cell" style="cursor: pointer;">2026/7/23 22:51:00</td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td style="cursor: pointer;">2026/7/23 22:51:00</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td></tr><tr><td><button class="del-btn">删除</button></td><td class="seq-cell">2</td><td rowspan="1" class="merge-cell" style="cursor: pointer;">2026/7/23 22:45:34</td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td style="cursor: pointer;">2026/7/23 22:45:34</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td></tr><tr><td><button class="del-btn">删除</button></td><td class="seq-cell">1</td><td rowspan="1" class="merge-cell" style="cursor: pointer;">2026/7/23 22:45:33</td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td style="cursor: pointer;">2026/7/23 22:45:33</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td></tr></tbody>
     </table>
   </div>
 </div>
@@ -142,10 +143,10 @@
 <!-- 新增变更弹窗 -->
 <div class="modal" id="changeModal">
   <div class="modal-box">
-    <h3>🔧 新增变更 · 方案 #<span id="chPlanId">4</span></h3>
+    <h3>🔧 新增变更 · 方案 #<span id="chPlanId"></span></h3>
     <div class="readonly-grid">
-      <div class="ro-item"><label>序列</label><div id="chSeq" class="ro-val">4</div></div>
-      <div class="ro-item"><label>建档日期</label><div id="chDate" class="ro-val">2026/7/23 22:51:14</div></div>
+      <div class="ro-item"><label>序列</label><div id="chSeq" class="ro-val"></div></div>
+      <div class="ro-item"><label>建档日期</label><div id="chDate" class="ro-val"></div></div>
       <div class="ro-item"><label>客户</label><div id="chCustomer" class="ro-val"></div></div>
       <div class="ro-item"><label>项目号</label><div id="chProjNo" class="ro-val"></div></div>
       <div class="ro-item"><label>项目名称</label><div id="chProjName" class="ro-val"></div></div>
@@ -168,14 +169,16 @@
   </div>
 </div>
 
-<div id="toast" class="toast success show">✅ 已为方案 #4 新增变更</div>
+<div id="toast" class="toast"></div>
 
 <!-- 数据持久化脚本：同步时会先更新此处的 rawData，再提交整个 HTML 文件 -->
-<script id="xmData">var rawData = [{"序列":4,"建档日期":"2026/7/23 22:51:14","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/23 23:08:33","工况":"啊啊啊","型号":"","配置":"","其他":""},{"序列":4,"建档日期":"2026/7/23 22:51:14","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/23 22:51:14","工况":"","型号":"","配置":"","其他":""},{"序列":3,"建档日期":"2026/7/23 22:51:00","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/23 22:51:00","工况":"","型号":"","配置":"","其他":""},{"序列":2,"建档日期":"2026/7/23 22:45:34","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/23 22:45:34","工况":"","型号":"","配置":"","其他":""},{"序列":1,"建档日期":"2026/7/23 22:45:33","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/23 22:45:33","工况":"","型号":"","配置":"","其他":""}];</script>
+<script id="xmData">var rawData = [{"序列":4,"建档日期":"2026/7/23 22:51:14","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/23 22:51:14","工况":"","型号":"","配置":"","其他":""},{"序列":3,"建档日期":"2026/7/23 22:51:00","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/23 22:51:00","工况":"","型号":"","配置":"","其他":""},{"序列":2,"建档日期":"2026/7/23 22:45:34","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/23 22:45:34","工况":"","型号":"","配置":"","其他":""},{"序列":1,"建档日期":"2026/7/23 22:45:33","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/23 22:45:33","工况":"","型号":"","配置":"","其他":""}];</script>
 
 <script>
 // ==================== 列定义 ====================
 var allColumns = ["序列", "建档日期", "客户", "项目号", "项目名称", "工程师", "变更时间", "工况", "型号", "配置", "其他"];
+// 同一方案的固定列（同一序列号的多条变更合并显示）
+var MERGE_COLS = ["建档日期", "客户", "项目号", "项目名称", "工程师"];
 
 // ==================== 渲染 ====================
 var tableBody = document.getElementById('tableBody');
@@ -189,6 +192,15 @@ function render() {
     tableBody.appendChild(tr);
     return;
   }
+  // 计算每个方案块（序列连续相同）的起始行与跨度，用于合并单元格
+  list.forEach(function (item, idx) {
+    item._isStart = (idx === 0) || (String(item['序列']) !== String(list[idx - 1]['序列']));
+    if (item._isStart) {
+      var span = 1;
+      while (idx + span < list.length && String(list[idx + span]['序列']) === String(item['序列'])) span++;
+      item._span = span;
+    }
+  });
   list.forEach(function (item, idx) {
     var tr = document.createElement('tr');
     // 删除按钮
@@ -201,6 +213,8 @@ function render() {
     tr.appendChild(tdOp);
     // 数据列
     allColumns.forEach(function (col) {
+      // 合并列：非方案起始行不渲染该单元格（由起始行的 rowspan 覆盖）
+      if (MERGE_COLS.indexOf(col) !== -1 && !item._isStart) return;
       var td = document.createElement('td');
       var val = item[col];
       td.textContent = (val === '' || val === null || val === undefined) ? '' : val;
@@ -208,6 +222,12 @@ function render() {
         // 序列列：点击弹出「新增变更」对话框
         td.className = 'seq-cell';
         td.onclick = (function (rowIdx) { return function () { openChangeDialog(rowIdx); }; })(item.__idx);
+      } else if (MERGE_COLS.indexOf(col) !== -1) {
+        // 合并列：起始行带 rowspan，可点击编辑（编辑会同步到该方案所有变更）
+        td.rowSpan = item._span;
+        td.className = 'merge-cell';
+        td.style.cursor = 'pointer';
+        td.onclick = (function (rowIdx, c) { return function () { startEdit(td, rowIdx, c); }; })(item.__idx, col);
       } else {
         td.style.cursor = 'pointer';
         td.onclick = (function (rowIdx, c) { return function () { startEdit(td, rowIdx, c); }; })(item.__idx, col);
@@ -251,6 +271,11 @@ function startEdit(td, rowIdx, col) {
 function finishEdit(td, rowIdx, col, val) {
   if (rawData[rowIdx][col] !== val) {
     rawData[rowIdx][col] = val;
+    // 合并列编辑时，同步到同一方案（序列号相同）的所有变更行
+    if (MERGE_COLS.indexOf(col) !== -1) {
+      var pid = String(rawData[rowIdx]['序列']);
+      rawData.forEach(function (r) { if (String(r['序列']) === pid) r[col] = val; });
+    }
     persistData();
     render();
     scheduleSync();
