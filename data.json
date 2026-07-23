@@ -152,7 +152,7 @@
     <label>提交信息</label>
     <input type="text" id="ghCommitMsg" placeholder="Update XM方案明细" value="Update XM方案明细">
     <button class="btn btn-outline" onclick="testGitHubConnection()" style="width:100%;margin-top:14px;justify-content:center;">🔗 测试连接</button>
-    <div id="testResult"></div>
+    <div id="testResult"><div class="test-result success">✅ 连接成功！仓库存在且 Token 有效。</div></div>
     <div class="modal-actions">
       <button class="btn btn-outline" onclick="closeSettings()">取消</button>
       <button class="btn btn-primary" onclick="saveGitHubSettings()">💾 保存设置</button>
@@ -160,7 +160,7 @@
   </div>
 </div>
 
-<div id="toast" class="toast"></div>
+<div id="toast" class="toast success show">GitHub 设置已保存</div>
 
 <!-- 数据持久化脚本：同步时会先更新此处的 rawData，再提交整个 HTML 文件 -->
 <script id="xmData">var rawData = [{"序列":2,"建档日期":"2026/7/23 22:45:34","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/23 22:45:34","工况":"","型号":"","配置":"","其他":""},{"序列":1,"建档日期":"2026/7/23 22:45:33","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/23 22:45:33","工况":"","型号":"","配置":"","其他":""}];</script>
