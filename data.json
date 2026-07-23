@@ -28,9 +28,9 @@
   .btn-outline { background: #fff; color: #555; border: 1px solid #ddd; }
   .btn-outline:hover { border-color: #1a73e8; color: #1a73e8; }
   .btn:disabled { opacity: 0.6; cursor: not-allowed; }
-  .filters { display: flex; flex-wrap: wrap; gap: 8px; padding: 10px 20px; background: #fafbfc; }
+  .filters { display: flex; flex-wrap: nowrap; gap: 8px; padding: 10px 12px; background: #fafbfc; border-bottom: 1px solid #eee; }
   .filters input {
-    padding: 6px 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 12px; min-width: 110px; outline: none;
+    flex: 1 1 0; min-width: 0; padding: 6px 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 12px; outline: none;
   }
   .filters input:focus { border-color: #1a73e8; box-shadow: 0 0 0 2px rgba(26,115,232,0.15); }
   .table-wrapper { margin: 12px 20px 80px; background: #fff; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); overflow: hidden; }
@@ -74,6 +74,14 @@
   .test-result { font-size: 13px; padding: 8px 10px; border-radius: 6px; margin-top: 10px; }
   .test-result.success { background: #e8f8ef; color: #07c160; }
   .test-result.fail { background: #fdeaea; color: #ff4d4f; }
+  .seq-cell { color: #1a73e8; font-weight: 600; cursor: pointer; text-decoration: underline; text-decoration-style: dashed; }
+  .seq-cell:hover { background: #eaf2ff; }
+  .readonly-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 12px; margin-bottom: 4px; }
+  .ro-item label { font-size: 12px; color: #888; margin: 0 0 2px; }
+  .ro-val { font-size: 13px; color: #333; background: #f5f6f8; border-radius: 6px; padding: 6px 8px; min-height: 16px; word-break: break-all; }
+  .modal-box textarea { width: 100%; padding: 8px 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; outline: none; resize: vertical; box-sizing: border-box; }
+  .modal-box textarea:focus { border-color: #1a73e8; }
+  .modal-box input[readonly] { background: #f5f6f8; color: #333; cursor: default; }
   .toast {
     position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
     padding: 10px 20px; border-radius: 8px; color: #fff; font-size: 14px; z-index: 1100;
@@ -83,11 +91,6 @@
   .toast.success { background: #07c160; }
   .toast.error { background: #ff4d4f; }
   .toast.info { background: #1a73e8; }
-  .gh-token-input {
-    padding: 7px 12px; border: 1px solid rgba(255,255,255,0.35); border-radius: 6px;
-    font-size: 13px; background: rgba(255,255,255,0.95); color: #333; width: 220px; outline: none;
-  }
-  .gh-token-input:focus { border-color: #fff; box-shadow: 0 0 0 2px rgba(255,255,255,0.4); }
 </style>
 </head>
 <body>
@@ -96,7 +99,6 @@
   <h1>XM方案明细</h1>
   <div class="actions">
     <span id="syncStatus" class="sync-status syncing"><span class="sync-dot"></span><span id="syncText">同步中...</span></span>
-    <input type="password" id="ghTokenInput" class="gh-token-input" placeholder="GitHub Token (ghp_...)">
     <button class="btn btn-success" id="downloadBtn" onclick="downloadFromGitHub()">📥 从 GitHub 下载</button>
     <button class="btn btn-primary" id="syncBtn" onclick="syncToGitHub()" disabled="">⏳ 同步中...</button>
   </div>
@@ -104,21 +106,16 @@
 
 <div class="toolbar">
   <button class="btn btn-success" onclick="addRow()">＋ 新增行</button>
-  <button class="btn btn-outline" onclick="exportToCSV()">📥 导出 CSV</button>
-  <button class="btn btn-outline" onclick="downloadJSON()">📦 下载 JSON</button>
-  <button class="btn btn-outline" onclick="clearAll()">🗑️ 清空</button>
-</div>
-
-<div class="filters">
-  <input placeholder="客户" id="f_客户" oninput="applyFilters()">
-  <input placeholder="项目号" id="f_项目号" oninput="applyFilters()">
-  <input placeholder="项目名称" id="f_项目名称" oninput="applyFilters()">
-  <input placeholder="工程师" id="f_工程师" oninput="applyFilters()">
-  <input placeholder="型号" id="f_型号" oninput="applyFilters()">
-  <input placeholder="工况" id="f_工况" oninput="applyFilters()">
 </div>
 
 <div class="table-wrapper">
+  <div class="filters">
+    <input placeholder="客户" id="f_客户" oninput="applyFilters()">
+    <input placeholder="项目号" id="f_项目号" oninput="applyFilters()">
+    <input placeholder="项目名称" id="f_项目名称" oninput="applyFilters()">
+    <input placeholder="工程师" id="f_工程师" oninput="applyFilters()">
+    <input placeholder="型号" id="f_型号" oninput="applyFilters()">
+  </div>
   <div class="table-scroll">
     <table id="dataTable">
       <thead>
@@ -137,15 +134,44 @@
           <th>其他</th>
         </tr>
       </thead>
-      <tbody id="tableBody"><tr><td><button class="del-btn">删除</button></td><td style="cursor: pointer;">4</td><td style="cursor: pointer;">2026/7/23 22:51:14</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;">2026/7/23 22:51:14</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td></tr><tr><td><button class="del-btn">删除</button></td><td style="cursor: pointer;">3</td><td style="cursor: pointer;">2026/7/23 22:51:00</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;">2026/7/23 22:51:00</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td></tr><tr><td><button class="del-btn">删除</button></td><td style="cursor: pointer;">2</td><td style="cursor: pointer;">2026/7/23 22:45:34</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;">2026/7/23 22:45:34</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td></tr><tr><td><button class="del-btn">删除</button></td><td style="cursor: pointer;">1</td><td style="cursor: pointer;">2026/7/23 22:45:33</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;">2026/7/23 22:45:33</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td></tr></tbody>
+      <tbody id="tableBody"><tr><td><button class="del-btn">删除</button></td><td class="seq-cell">4</td><td style="cursor: pointer;">2026/7/23 22:51:14</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;">2026/7/23 23:08:33</td><td style="cursor: pointer;">啊啊啊</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td></tr><tr><td><button class="del-btn">删除</button></td><td class="seq-cell">4</td><td style="cursor: pointer;">2026/7/23 22:51:14</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;">2026/7/23 22:51:14</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td></tr><tr><td><button class="del-btn">删除</button></td><td class="seq-cell">3</td><td style="cursor: pointer;">2026/7/23 22:51:00</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;">2026/7/23 22:51:00</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td></tr><tr><td><button class="del-btn">删除</button></td><td class="seq-cell">2</td><td style="cursor: pointer;">2026/7/23 22:45:34</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;">2026/7/23 22:45:34</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td></tr><tr><td><button class="del-btn">删除</button></td><td class="seq-cell">1</td><td style="cursor: pointer;">2026/7/23 22:45:33</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;">2026/7/23 22:45:33</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td></tr></tbody>
     </table>
   </div>
 </div>
 
-<div id="toast" class="toast success">✅ 已从 GitHub 下载 3 条</div>
+<!-- 新增变更弹窗 -->
+<div class="modal" id="changeModal">
+  <div class="modal-box">
+    <h3>🔧 新增变更 · 方案 #<span id="chPlanId">4</span></h3>
+    <div class="readonly-grid">
+      <div class="ro-item"><label>序列</label><div id="chSeq" class="ro-val">4</div></div>
+      <div class="ro-item"><label>建档日期</label><div id="chDate" class="ro-val">2026/7/23 22:51:14</div></div>
+      <div class="ro-item"><label>客户</label><div id="chCustomer" class="ro-val"></div></div>
+      <div class="ro-item"><label>项目号</label><div id="chProjNo" class="ro-val"></div></div>
+      <div class="ro-item"><label>项目名称</label><div id="chProjName" class="ro-val"></div></div>
+      <div class="ro-item"><label>工程师</label><div id="chEngineer" class="ro-val"></div></div>
+    </div>
+    <label>变更时间（自动生成）</label>
+    <input type="text" id="chChangeTime" readonly="">
+    <label>工况</label>
+    <input type="text" id="chCond" placeholder="输入工况">
+    <label>型号</label>
+    <input type="text" id="chModel" placeholder="输入型号">
+    <label>配置</label>
+    <textarea id="chConfig" rows="3" placeholder="输入配置"></textarea>
+    <label>其他</label>
+    <textarea id="chOther" rows="2" placeholder="输入其他"></textarea>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeChangeModal()">取消</button>
+      <button class="btn btn-primary" onclick="submitChange()">✅ 保存变更</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast success show">✅ 已为方案 #4 新增变更</div>
 
 <!-- 数据持久化脚本：同步时会先更新此处的 rawData，再提交整个 HTML 文件 -->
-<script id="xmData">var rawData = [{"序列":4,"建档日期":"2026/7/23 22:51:14","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/23 22:51:14","工况":"","型号":"","配置":"","其他":""},{"序列":3,"建档日期":"2026/7/23 22:51:00","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/23 22:51:00","工况":"","型号":"","配置":"","其他":""},{"序列":2,"建档日期":"2026/7/23 22:45:34","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/23 22:45:34","工况":"","型号":"","配置":"","其他":""},{"序列":1,"建档日期":"2026/7/23 22:45:33","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/23 22:45:33","工况":"","型号":"","配置":"","其他":""}];</script>
+<script id="xmData">var rawData = [{"序列":4,"建档日期":"2026/7/23 22:51:14","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/23 23:08:33","工况":"啊啊啊","型号":"","配置":"","其他":""},{"序列":4,"建档日期":"2026/7/23 22:51:14","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/23 22:51:14","工况":"","型号":"","配置":"","其他":""},{"序列":3,"建档日期":"2026/7/23 22:51:00","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/23 22:51:00","工况":"","型号":"","配置":"","其他":""},{"序列":2,"建档日期":"2026/7/23 22:45:34","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/23 22:45:34","工况":"","型号":"","配置":"","其他":""},{"序列":1,"建档日期":"2026/7/23 22:45:33","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/23 22:45:33","工况":"","型号":"","配置":"","其他":""}];</script>
 
 <script>
 // ==================== 列定义 ====================
@@ -178,8 +204,14 @@ function render() {
       var td = document.createElement('td');
       var val = item[col];
       td.textContent = (val === '' || val === null || val === undefined) ? '' : val;
-      td.style.cursor = 'pointer';
-      td.onclick = (function (rowIdx, c) { return function () { startEdit(td, rowIdx, c); }; })(item.__idx, col);
+      if (col === '序列') {
+        // 序列列：点击弹出「新增变更」对话框
+        td.className = 'seq-cell';
+        td.onclick = (function (rowIdx) { return function () { openChangeDialog(rowIdx); }; })(item.__idx);
+      } else {
+        td.style.cursor = 'pointer';
+        td.onclick = (function (rowIdx, c) { return function () { startEdit(td, rowIdx, c); }; })(item.__idx, col);
+      }
       tr.appendChild(td);
     });
     tableBody.appendChild(tr);
@@ -226,6 +258,7 @@ function finishEdit(td, rowIdx, col, val) {
 }
 
 // ==================== 增删 ====================
+// 序列 = 方案编号（稳定 ID，同一方案的多条变更共享同一编号，不随增删变动）
 function addRow() {
   var now = new Date().toLocaleString('zh-CN');
   var maxSeq = 0;
@@ -249,41 +282,60 @@ function deleteRow(idx) {
   scheduleSync();
 }
 
-function clearAll() {
-  if (!confirm('确定清空所有数据吗？此操作不可恢复！')) return;
-  rawData = [];
+// ==================== 新增变更（点击序列列弹出） ====================
+var chPlanSeq = null; // 当前操作的方案编号
+
+function openChangeDialog(rowIdx) {
+  var row = rawData[rowIdx];
+  if (!row) return;
+  chPlanSeq = row['序列'];
+  document.getElementById('chPlanId').textContent = row['序列'];
+  document.getElementById('chSeq').textContent = row['序列'] || '';
+  document.getElementById('chDate').textContent = row['建档日期'] || '';
+  document.getElementById('chCustomer').textContent = row['客户'] || '';
+  document.getElementById('chProjNo').textContent = row['项目号'] || '';
+  document.getElementById('chProjName').textContent = row['项目名称'] || '';
+  document.getElementById('chEngineer').textContent = row['工程师'] || '';
+  document.getElementById('chChangeTime').value = new Date().toLocaleString('zh-CN');
+  document.getElementById('chCond').value = '';
+  document.getElementById('chModel').value = '';
+  document.getElementById('chConfig').value = '';
+  document.getElementById('chOther').value = '';
+  document.getElementById('changeModal').classList.add('show');
+  setTimeout(function () { document.getElementById('chCond').focus(); }, 50);
+}
+
+function closeChangeModal() {
+  document.getElementById('changeModal').classList.remove('show');
+  chPlanSeq = null;
+}
+
+function submitChange() {
+  if (chPlanSeq === null && chPlanSeq !== 0) { showToast('无效方案', 'error'); return; }
+  var pid = chPlanSeq;
+  // 从现有方案第一条读取固定字段（建档日期/客户/项目号/项目名称/工程师）
+  var src = rawData.find(function (r) { return String(r['序列']) === String(pid); });
+  if (!src) { showToast('未找到该方案', 'error'); return; }
+  var now = new Date().toLocaleString('zh-CN');
+  var newRow = {
+    序列: pid,
+    建档日期: src['建档日期'],
+    客户: src['客户'], 项目号: src['项目号'], 项目名称: src['项目名称'], 工程师: src['工程师'],
+    变更时间: now,
+    工况: document.getElementById('chCond').value.trim(),
+    型号: document.getElementById('chModel').value.trim(),
+    配置: document.getElementById('chConfig').value.trim(),
+    其他: document.getElementById('chOther').value.trim()
+  };
+  // 插入到该方案在表格中的最上方
+  var topIdx = rawData.findIndex(function (r) { return String(r['序列']) === String(pid); });
+  if (topIdx === -1) topIdx = 0;
+  rawData.splice(topIdx, 0, newRow);
+  closeChangeModal();
   persistData();
   render();
   scheduleSync();
-}
-
-// ==================== 导出 ====================
-function exportToCSV() {
-  var list = getFiltered();
-  var rows = [allColumns.join(',')];
-  list.forEach(function (item) {
-    var line = allColumns.map(function (c) {
-      var v = (item[c] === null || item[c] === undefined) ? '' : String(item[c]);
-      if (v.indexOf(',') !== -1 || v.indexOf('"') !== -1) v = '"' + v.replace(/"/g, '""') + '"';
-      return v;
-    }).join(',');
-    rows.push(line);
-  });
-  var blob = new Blob(['﻿' + rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
-  var a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'XM方案明细_' + new Date().toISOString().slice(0, 10) + '.csv';
-  a.click();
-  URL.revokeObjectURL(a.href);
-}
-
-function downloadJSON() {
-  var blob = new Blob([JSON.stringify(rawData, null, 2)], { type: 'application/json' });
-  var a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'XM方案明细_' + new Date().toISOString().slice(0, 10) + '.json';
-  a.click();
-  URL.revokeObjectURL(a.href);
+  showToast('✅ 已为方案 #' + pid + ' 新增变更', 'success');
 }
 
 // ==================== 数据持久化（同步前更新脚本内容） ====================
@@ -308,20 +360,14 @@ function loadGitHubSettings() {
       saved = JSON.stringify(DEFAULT_GH);
       localStorage.setItem('xm_github_settings', saved);
     }
-    var s = JSON.parse(saved);
-    // 预填头部 Token 输入框（若存在已保存的 token）
-    document.getElementById('ghTokenInput').value = s.token || '';
     updateSyncStatus('idle', '已配置');
   } catch (e) {}
 }
 
-// 读取当前配置：user/repo/filePath 用默认值，token 取头部输入框（并持久化以便下次自动填入）
+// 获取配置：user/repo/filePath 固定，token 从 localStorage 读取，未设置则弹窗输入
 function getGitHubSettings() {
   var saved = localStorage.getItem('xm_github_settings');
   var s = saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(DEFAULT_GH));
-  var token = document.getElementById('ghTokenInput').value.trim();
-  s.token = token;
-  if (token) localStorage.setItem('xm_github_settings', JSON.stringify(s));
   return s;
 }
 
@@ -336,10 +382,13 @@ function updateSyncStatus(status, text) {
 
 async function syncToGitHub() {
   var settings = getGitHubSettings();
-  if (!settings.user || !settings.repo || !settings.token) {
-    showToast('请先在右上角输入 GitHub Token', 'error');
-    return;
+  if (!settings.token) {
+    var t = prompt('请输入 GitHub Token：');
+    if (!t) return;
+    settings.token = t.trim();
+    localStorage.setItem('xm_github_settings', JSON.stringify(settings));
   }
+  if (!settings.user || !settings.repo) { showToast('配置错误', 'error'); return; }
   updateSyncStatus('syncing', '同步中...');
   var btn = document.getElementById('syncBtn');
   btn.disabled = true;
@@ -399,30 +448,32 @@ async function syncToGitHub() {
 var _syncTimer = null;
 function scheduleSync() {
   clearTimeout(_syncTimer);
-  var token = document.getElementById('ghTokenInput').value.trim();
-  if (!token) return; // 未填 Token 时不自动同步
+  var s = getGitHubSettings();
+  if (!s.token) return;
   _syncTimer = setTimeout(function () { syncToGitHub(); }, 1500);
 }
 
-// ==================== 从 GitHub 下载 ====================
-async function downloadFromGitHub() {
+// ==================== 从 GitHub 下载（公开仓库无需 Token） ====================
+// auto=true 时为打开文件时自动调用：404（仓库中尚无文件）静默跳过，不弹错误
+async function downloadFromGitHub(auto) {
   var settings = getGitHubSettings();
-  if (!settings.user || !settings.repo || !settings.token) {
-    showToast('请先在右上角输入 GitHub Token', 'error');
-    return;
+  if (!settings.user || !settings.repo) { if (!auto) showToast('配置错误', 'error'); return; }
+  if (!auto) {
+    updateSyncStatus('syncing', '下载中...');
+    var btn = document.getElementById('downloadBtn');
+    btn.disabled = true;
+    btn.textContent = '⏳ 下载中...';
   }
-  updateSyncStatus('syncing', '下载中...');
-  var btn = document.getElementById('downloadBtn');
-  btn.disabled = true;
-  btn.textContent = '⏳ 下载中...';
   try {
     var url = 'https://api.github.com/repos/' + encodeURIComponent(settings.user) + '/' + encodeURIComponent(settings.repo) + '/contents/' + encodeURIComponent(settings.filePath);
-    var headers = { 'Authorization': 'token ' + settings.token, 'Accept': 'application/vnd.github.v3+json' };
+    // 有 Token 则带上（提高限额），没有也能下载公开仓库
+    var headers = { 'Accept': 'application/vnd.github.v3+json' };
+    if (settings.token) headers['Authorization'] = 'token ' + settings.token;
     var resp = await fetch(url, { headers: headers });
     if (!resp.ok) {
+      if (auto && resp.status === 404) return; // 尚未上传，静默跳过
       var err = await resp.json().catch(function(){return {};});
-      updateSyncStatus('error', '下载失败');
-      showToast('❌ 下载失败: ' + (err.message || '未知错误'), 'error');
+      if (!auto) { updateSyncStatus('error', '下载失败'); showToast('❌ 下载失败: ' + (err.message || '未知错误'), 'error'); }
       return;
     }
     var data = await resp.json();
@@ -430,8 +481,7 @@ async function downloadFromGitHub() {
     // 提取仓库文件中的 rawData
     var m = htmlStr.match(/<script id="xmData">([\s\S]*?)<\/script>/);
     if (!m) {
-      updateSyncStatus('error', '下载失败');
-      showToast('❌ 文件中未找到数据', 'error');
+      if (!auto) { updateSyncStatus('error', '下载失败'); showToast('❌ 文件中未找到数据', 'error'); }
       return;
     }
     var newData = new Function(m[1] + '\n; return rawData;')();
@@ -439,13 +489,14 @@ async function downloadFromGitHub() {
     rawData = newData;
     render();
     updateSyncStatus('idle', '已同步');
-    showToast('✅ 已从 GitHub 下载 ' + rawData.length + ' 条', 'success');
+    if (!auto) showToast('✅ 已从 GitHub 下载 ' + rawData.length + ' 条', 'success');
   } catch (e) {
-    updateSyncStatus('error', '下载失败');
-    showToast('❌ 下载失败: ' + e.message, 'error');
+    if (!auto) { updateSyncStatus('error', '下载失败'); showToast('❌ 下载失败: ' + e.message, 'error'); }
   }
-  btn.disabled = false;
-  btn.textContent = '📥 从 GitHub 下载';
+  if (!auto) {
+    btn.disabled = false;
+    btn.textContent = '📥 从 GitHub 下载';
+  }
 }
 
 // ==================== Toast ====================
@@ -460,6 +511,12 @@ function showToast(msg, type) {
 // ==================== 初始化 ====================
 loadGitHubSettings();
 render();
+// 点击遮罩关闭变更弹窗
+document.getElementById('changeModal').addEventListener('click', function (e) {
+  if (e.target === this) closeChangeModal();
+});
+// 打开文件时自动从 GitHub 拉取最新数据
+downloadFromGitHub(true);
 </script>
 
 
