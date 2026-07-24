@@ -76,6 +76,18 @@
   .test-result.fail { background: #fdeaea; color: #ff4d4f; }
   .seq-cell { color: #1a73e8; font-weight: 600; cursor: pointer; text-decoration: underline; text-decoration-style: dashed; vertical-align: middle; text-align: center; }
   .seq-cell:hover { background: #eaf2ff; }
+  /* 操作列：三个按钮纵向排列 */
+  .op-cell { display: flex; flex-direction: column; gap: 5px; align-items: stretch; padding: 6px 4px; vertical-align: top; }
+  .op-btn { padding: 4px 6px; font-size: 12px; border-radius: 5px; border: 1px solid #ddd; background: #fff; cursor: pointer; white-space: nowrap; transition: background .15s; }
+  .op-btn:hover { background: #f0f2f5; }
+  .op-btn.del-btn { color: #d33; border-color: #f0c0c0; }
+  .op-btn.edit-btn { color: #1a73e8; border-color: #bcd4f8; }
+  .op-btn.done-btn { color: #fff; background: #1a73e8; border-color: #1a73e8; }
+  .op-btn.done-btn:hover { background: #155ec0; }
+  .op-btn.finalize-btn { color: #555; border-color: #ddd; }
+  .op-btn.finalize-btn.finalized { color: #2e7d32; border-color: #a5d6a7; background: #e8f5e9; }
+  .cell-input { width: 100%; box-sizing: border-box; padding: 5px 8px; border: 1px solid #1a73e8; border-radius: 4px; font-size: 13px; outline: none; }
+  tr.finalized-row { background: #f3f8f3; }
   /* 偶数序列号方案：浅黄背景（覆盖合并单元格默认的浅灰背景） */
   tr.row-even td { background: #fff9c4 !important; }
   tr.row-even td.seq-cell:hover { background: #eaf2ff !important; }
@@ -138,7 +150,7 @@
           <th>其他</th>
         </tr>
       </thead>
-      <tbody id="tableBody"><tr class="row-even"><td><button class="del-btn">删除</button></td><td class="seq-cell" rowspan="1">2</td><td rowspan="1" class="merge-cell" style="cursor: pointer;">2026/7/24 13:27:39</td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td style="cursor: pointer;">2026/7/24 13:27:39</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td></tr><tr><td><button class="del-btn">删除</button></td><td class="seq-cell" rowspan="1">1</td><td rowspan="1" class="merge-cell" style="cursor: pointer;">2026/7/24 13:27:38</td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td style="cursor: pointer;">2026/7/24 13:27:38</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td></tr></tbody>
+      <tbody id="tableBody"><tr class="row-even"><td class="op-cell"><button class="op-btn del-btn">删除</button><button class="op-btn edit-btn">编辑</button><button class="op-btn finalize-btn">☐ 定型</button></td><td class="seq-cell" rowspan="1">2</td><td rowspan="1" class="merge-cell" style="cursor: pointer;">2026/7/24 13:27:39</td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td style="cursor: pointer;">2026/7/24 13:27:39</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td></tr><tr><td class="op-cell"><button class="op-btn del-btn">删除</button><button class="op-btn edit-btn">编辑</button><button class="op-btn finalize-btn">☐ 定型</button></td><td class="seq-cell" rowspan="1">1</td><td rowspan="1" class="merge-cell" style="cursor: pointer;">2026/7/24 13:27:38</td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td style="cursor: pointer;">2026/7/24 13:27:38</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td></tr></tbody>
     </table>
   </div>
 </div>
@@ -175,7 +187,7 @@
 <div id="toast" class="toast"></div>
 
 <!-- 数据持久化脚本：同步时会先更新此处的 rawData，再提交整个 HTML 文件 -->
-<script id="xmData">var rawData = [{"序列":2,"建档日期":"2026/7/24 13:27:39","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/24 13:27:39","工况":"","型号":"","配置":"","其他":""},{"序列":1,"建档日期":"2026/7/24 13:27:38","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/24 13:27:38","工况":"","型号":"","配置":"","其他":""}];</script>
+<script id="xmData">var rawData = [{"序列":2,"建档日期":"2026/7/24 13:27:39","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/24 13:27:39","工况":"","型号":"","配置":"","其他":"","定型":false},{"序列":1,"建档日期":"2026/7/24 13:27:38","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/24 13:27:38","工况":"","型号":"","配置":"","其他":""}];</script>
 
 <script>
 // ==================== 列定义 ====================
@@ -223,35 +235,72 @@ function render() {
     // 偶数序列号的方案行使用浅黄背景，便于区分
     var _seqNum = parseInt(item['序列'], 10);
     if (!isNaN(_seqNum) && _seqNum % 2 === 0) tr.className = 'row-even';
-    // 删除按钮
+    if (rawData[item.__idx]['定型']) tr.className += ' finalized-row';
+    // 操作列：删除 / 编辑 / 定型 三个按钮纵向排列
     var tdOp = document.createElement('td');
+    tdOp.className = 'op-cell';
+    var rowIdx = item.__idx;
+    var isEditing = (editingIdx === rowIdx);
+    // 删除
     var del = document.createElement('button');
-    del.className = 'del-btn';
+    del.className = 'op-btn del-btn';
     del.textContent = '删除';
-    del.onclick = (function (rowIdx) { return function () { deleteRow(rowIdx); }; })(item.__idx);
+    del.onclick = (function (ri) { return function () { deleteRow(ri); }; })(rowIdx);
     tdOp.appendChild(del);
+    // 编辑 / 完成（编辑模式下切换为「完成」）
+    var editBtn = document.createElement('button');
+    if (isEditing) {
+      editBtn.className = 'op-btn done-btn';
+      editBtn.textContent = '完成';
+      editBtn.onclick = (function () { return function () { editingIdx = null; render(); }; })();
+    } else {
+      editBtn.className = 'op-btn edit-btn';
+      editBtn.textContent = '编辑';
+      editBtn.onclick = (function (ri) { return function () { editRow(ri); }; })(rowIdx);
+    }
+    tdOp.appendChild(editBtn);
+    // 定型（勾选按钮，按变更行独立）
+    var finalized = !!rawData[rowIdx]['定型'];
+    var finBtn = document.createElement('button');
+    finBtn.className = 'op-btn finalize-btn' + (finalized ? ' finalized' : '');
+    finBtn.textContent = finalized ? '☑ 已定型' : '☐ 定型';
+    finBtn.onclick = (function (ri) { return function () { toggleFinalize(ri); }; })(rowIdx);
+    tdOp.appendChild(finBtn);
     tr.appendChild(tdOp);
     // 数据列
     allColumns.forEach(function (col) {
       // 合并列：非方案起始行不渲染该单元格（由起始行的 rowspan 覆盖）
       if (MERGE_COLS.indexOf(col) !== -1 && !item._isStart) return;
       var td = document.createElement('td');
-      var val = item[col];
-      td.textContent = (val === '' || val === null || val === undefined) ? '' : val;
-      if (col === '序列') {
-        // 序列列：同一方案合并显示，点击弹出「新增变更」对话框
-        td.className = 'seq-cell';
-        td.rowSpan = item._span;
-        td.onclick = (function (rowIdx) { return function () { openChangeDialog(rowIdx); }; })(item.__idx);
-      } else if (MERGE_COLS.indexOf(col) !== -1) {
-        // 合并列：起始行带 rowspan，可点击编辑（编辑会同步到该方案所有变更）
-        td.rowSpan = item._span;
-        td.className = 'merge-cell';
-        td.style.cursor = 'pointer';
-        td.onclick = (function (rowIdx, c) { return function () { startEdit(td, rowIdx, c); }; })(item.__idx, col);
+      if (editingIdx === item.__idx) {
+        // 整行编辑模式：渲染输入框
+        var input = document.createElement('input');
+        input.className = 'cell-input';
+        input.value = (rawData[item.__idx][col] === undefined || rawData[item.__idx][col] === null) ? '' : rawData[item.__idx][col];
+        td.appendChild(input);
+        input.onblur = (function (ri, c, inp) { return function () { commitEdit(inp, ri, c); }; })(item.__idx, col, input);
+        input.onkeydown = function (e) {
+          if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
+          else if (e.key === 'Escape') { editingIdx = null; render(); }
+        };
       } else {
-        td.style.cursor = 'pointer';
-        td.onclick = (function (rowIdx, c) { return function () { startEdit(td, rowIdx, c); }; })(item.__idx, col);
+        var val = item[col];
+        td.textContent = (val === '' || val === null || val === undefined) ? '' : val;
+        if (col === '序列') {
+          // 序列列：同一方案合并显示，点击弹出「新增变更」对话框
+          td.className = 'seq-cell';
+          td.rowSpan = item._span;
+          td.onclick = (function (rowIdx) { return function () { openChangeDialog(rowIdx); }; })(item.__idx);
+        } else if (MERGE_COLS.indexOf(col) !== -1) {
+          // 合并列：起始行带 rowspan，可点击编辑（编辑会同步到该方案所有变更）
+          td.rowSpan = item._span;
+          td.className = 'merge-cell';
+          td.style.cursor = 'pointer';
+          td.onclick = (function (rowIdx, c) { return function () { startEdit(td, rowIdx, c); }; })(item.__idx, col);
+        } else {
+          td.style.cursor = 'pointer';
+          td.onclick = (function (rowIdx, c) { return function () { startEdit(td, rowIdx, c); }; })(item.__idx, col);
+        }
       }
       tr.appendChild(td);
     });
@@ -303,6 +352,35 @@ function finishEdit(td, rowIdx, col, val) {
   }
 }
 
+// ==================== 整行编辑（编辑按钮） ====================
+var editingIdx = null; // 当前处于整行编辑模式的 rawData 下标
+
+function editRow(rowIdx) {
+  editingIdx = rowIdx;
+  render();
+}
+
+// 编辑模式下提交单个单元格（仅保存数据，不重渲染，避免输入框失焦引发的按钮点击竞态；由「完成」统一退出编辑）
+function commitEdit(input, rowIdx, col) {
+  var val = input.value;
+  rawData[rowIdx][col] = val;
+  // 合并列编辑时，同步到同一方案（序列号相同）的所有变更行
+  if (MERGE_COLS.indexOf(col) !== -1) {
+    var pid = String(rawData[rowIdx]['序列']);
+    rawData.forEach(function (r) { if (String(r['序列']) === pid) r[col] = val; });
+  }
+  persistData();
+  scheduleSync();
+}
+
+// 定型勾选（按变更行独立）
+function toggleFinalize(rowIdx) {
+  rawData[rowIdx]['定型'] = !rawData[rowIdx]['定型'];
+  persistData();
+  render();
+  scheduleSync();
+}
+
 // ==================== 增删 ====================
 // 序列 = 方案编号（同一方案的多条变更共享同一编号；新增取最大号+1，删除方案后由 renumberSchemes 重新连续编号）
 function addRow() {
@@ -313,7 +391,8 @@ function addRow() {
     序列: maxSeq + 1,
     建档日期: now,
     客户: '', 项目号: '', 项目名称: '', 工程师: '',
-    变更时间: now, 工况: '', 型号: '', 配置: '', 其他: ''
+    变更时间: now, 工况: '', 型号: '', 配置: '', 其他: '',
+    定型: false
   });
   persistData();
   render();
@@ -372,7 +451,8 @@ function submitChange() {
     工况: document.getElementById('chCond').value.trim(),
     型号: document.getElementById('chModel').value.trim(),
     配置: document.getElementById('chConfig').value.trim(),
-    其他: document.getElementById('chOther').value.trim()
+    其他: document.getElementById('chOther').value.trim(),
+    定型: false
   };
   // 插入到该方案在表格中的最上方
   var topIdx = rawData.findIndex(function (r) { return String(r['序列']) === String(pid); });
