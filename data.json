@@ -76,6 +76,11 @@
   .test-result.fail { background: #fdeaea; color: #ff4d4f; }
   .seq-cell { color: #1a73e8; font-weight: 600; cursor: pointer; text-decoration: underline; text-decoration-style: dashed; vertical-align: middle; text-align: center; }
   .seq-cell:hover { background: #eaf2ff; }
+  /* 标题导航：两个可切换视图 */
+  .title-nav { display: flex; gap: 6px; align-items: baseline; }
+  .title-link { font-size: 20px; font-weight: 700; color: #fff; cursor: pointer; opacity: 0.65; padding: 2px 6px; border-radius: 6px 6px 0 0; transition: opacity .15s, background .15s; }
+  .title-link:hover { opacity: 1; background: rgba(255,255,255,0.15); }
+  .title-link.active { opacity: 1; border-bottom: 3px solid #fff; }
   /* 操作列：三个按钮纵向排列 */
   .op-cell { display: flex; flex-direction: column; gap: 5px; align-items: stretch; padding: 6px 4px; vertical-align: top; }
   .op-btn { padding: 4px 6px; font-size: 12px; border-radius: 5px; border: 1px solid #ddd; background: #fff; cursor: pointer; white-space: nowrap; transition: background .15s; }
@@ -112,7 +117,10 @@
 <body>
 
 <div class="header">
-  <h1>XM方案明细</h1>
+  <div class="title-nav">
+    <span class="title-link active" id="navXm" onclick="showView('xm')">XM方案明细</span>
+    <span class="title-link" id="navPrice" onclick="showView('price')">价格明细</span>
+  </div>
   <div class="actions">
     <span id="syncStatus" class="sync-status syncing"><span class="sync-dot"></span><span id="syncText">同步中...</span></span>
     <button class="btn btn-success" id="downloadBtn" onclick="downloadFromGitHub()">📥 从 GitHub 下载</button>
@@ -120,6 +128,7 @@
   </div>
 </div>
 
+<div id="xmView">
 <div class="toolbar">
   <button class="btn btn-success" onclick="addRow()">＋ 新增行</button>
 </div>
@@ -150,10 +159,48 @@
           <th>其他</th>
         </tr>
       </thead>
-      <tbody id="tableBody"><tr class="row-even"><td class="op-cell"><button class="op-btn del-btn">删除</button><button class="op-btn edit-btn">编辑</button><button class="op-btn finalize-btn">☐ 定型</button></td><td class="seq-cell" rowspan="1">2</td><td rowspan="1" class="merge-cell" style="cursor: pointer;">2026/7/24 13:27:39</td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td style="cursor: pointer;">2026/7/24 13:27:39</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td></tr><tr><td class="op-cell"><button class="op-btn del-btn">删除</button><button class="op-btn edit-btn">编辑</button><button class="op-btn finalize-btn">☐ 定型</button></td><td class="seq-cell" rowspan="1">1</td><td rowspan="1" class="merge-cell" style="cursor: pointer;">2026/7/24 13:27:38</td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td style="cursor: pointer;">2026/7/24 13:27:38</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td></tr></tbody>
+      <tbody id="tableBody"><tr class="row-even finalized-row"><td class="op-cell"><button class="op-btn del-btn">删除</button><button class="op-btn edit-btn">编辑</button><button class="op-btn finalize-btn finalized">☑ 已定型</button></td><td class="seq-cell" rowspan="1">2</td><td rowspan="1" class="merge-cell" style="cursor: pointer;">2026/7/24 13:27:39</td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td style="cursor: pointer;">2026/7/24 13:27:39</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td></tr><tr><td class="op-cell"><button class="op-btn del-btn">删除</button><button class="op-btn edit-btn">编辑</button><button class="op-btn finalize-btn">☐ 定型</button></td><td class="seq-cell" rowspan="1">1</td><td rowspan="1" class="merge-cell" style="cursor: pointer;">2026/7/24 13:27:38</td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td style="cursor: pointer;">2026/7/24 13:27:38</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td></tr></tbody>
     </table>
   </div>
 </div>
+</div><!-- /xmView -->
+
+<!-- 价格明细视图（由 XM 中已「定型」的行自动生成，列标题与 XM 一致） -->
+<div id="priceView" style="display:none">
+  <div class="toolbar">
+    <span style="font-size:13px;color:#888;align-self:center;">本表由「XM方案明细」中已勾选为「定型」的方案自动生成，无需手动添加</span>
+  </div>
+  <div class="table-wrapper">
+    <div class="filters">
+      <input placeholder="客户" id="pf_客户" oninput="applyFilters()">
+      <input placeholder="项目号" id="pf_项目号" oninput="applyFilters()">
+      <input placeholder="项目名称" id="pf_项目名称" oninput="applyFilters()">
+      <input placeholder="工程师" id="pf_工程师" oninput="applyFilters()">
+      <input placeholder="型号" id="pf_型号" oninput="applyFilters()">
+    </div>
+    <div class="table-scroll">
+      <table id="priceTable">
+        <thead>
+          <tr>
+            <th style="width:60px;">操作</th>
+            <th style="width:60px;">序列</th>
+            <th>建档日期</th>
+            <th>客户</th>
+            <th>项目号</th>
+            <th>项目名称</th>
+            <th>工程师</th>
+            <th>变更时间</th>
+            <th>工况</th>
+            <th>型号</th>
+            <th>配置</th>
+            <th>其他</th>
+          </tr>
+        </thead>
+        <tbody id="priceTableBody"><tr><td colspan="12" style="padding:24px;color:#999;">暂无定型方案，请在「XM方案明细」中将方案勾选为「定型」</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div><!-- /priceView -->
 
 <!-- 新增变更弹窗 -->
 <div class="modal" id="changeModal">
@@ -187,7 +234,7 @@
 <div id="toast" class="toast"></div>
 
 <!-- 数据持久化脚本：同步时会先更新此处的 rawData，再提交整个 HTML 文件 -->
-<script id="xmData">var rawData = [{"序列":2,"建档日期":"2026/7/24 13:27:39","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/24 13:27:39","工况":"","型号":"","配置":"","其他":"","定型":false},{"序列":1,"建档日期":"2026/7/24 13:27:38","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/24 13:27:38","工况":"","型号":"","配置":"","其他":""}];</script>
+<script id="xmData">var rawData = [{"序列":2,"建档日期":"2026/7/24 13:27:39","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/24 13:27:39","工况":"","型号":"","配置":"","其他":"","定型":true},{"序列":1,"建档日期":"2026/7/24 13:27:38","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/24 13:27:38","工况":"","型号":"","配置":"","其他":""}];</script>
 
 <script>
 // ==================== 列定义 ====================
@@ -321,7 +368,7 @@ function getFiltered() {
   });
 }
 
-function applyFilters() { render(); }
+function applyFilters() { if (currentView === 'xm') render(); else renderPrice(); }
 
 // ==================== 编辑 ====================
 function startEdit(td, rowIdx, col) {
@@ -347,7 +394,7 @@ function finishEdit(td, rowIdx, col, val) {
       rawData.forEach(function (r) { if (String(r['序列']) === pid) r[col] = val; });
     }
     persistData();
-    render();
+    applyFilters();
     scheduleSync();
   }
 }
@@ -373,12 +420,173 @@ function commitEdit(input, rowIdx, col) {
   scheduleSync();
 }
 
-// 定型勾选（按变更行独立）
+// 定型勾选（按变更行独立）；切换后会自动刷新两侧视图（价格明细由定型行生成）
 function toggleFinalize(rowIdx) {
   rawData[rowIdx]['定型'] = !rawData[rowIdx]['定型'];
   persistData();
-  render();
+  applyFilters();
   scheduleSync();
+}
+
+// ==================== 价格明细视图（由 XM 中已「定型」的行自动生成） ====================
+// 列标题与 XM 视图完全一致
+var priceViewColumns = ["序列", "建档日期", "客户", "项目号", "项目名称", "工程师", "变更时间", "工况", "型号", "配置", "其他"];
+var priceEditingIdx = null;
+var currentView = 'xm';
+var priceTableBody = document.getElementById('priceTableBody');
+
+// 由 XM 数据筛选出已定型（定型 === true）的行，并自底向上重新编号：
+// 表格最下方为序列 1，向上依次递增（与 XM 视图「最小的在下面、从小到大」排序一致）
+function getPriceList() {
+  var fin = [];
+  rawData.forEach(function (r, i) { if (r && r['定型']) fin.push({ row: r, idx: i }); });
+  var counter = 0;
+  for (var i = fin.length - 1; i >= 0; i--) { counter++; fin[i].newSeq = counter; }
+  return fin.map(function (o) {
+    var r = Object.assign({}, o.row);
+    r['序列'] = o.newSeq;     // 价格视图内独立的自增序列号
+    r.__idx = o.idx;          // 指向 XM 源数据的下标，操作会同步回源
+    return r;
+  });
+}
+
+function getPriceFiltered() {
+  var f = {};
+  priceViewColumns.forEach(function (c) {
+    var el = document.getElementById('pf_' + c);
+    if (el && el.value.trim()) f[c] = el.value.trim().toLowerCase();
+  });
+  return getPriceList().filter(function (row) {
+    return Object.keys(f).every(function (c) {
+      return (row[c] || '').toString().toLowerCase().indexOf(f[c]) !== -1;
+    });
+  });
+}
+
+function renderPrice() {
+  priceTableBody.innerHTML = '';
+  var list = getPriceFiltered();
+  if (list.length === 0) {
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td colspan="' + (priceViewColumns.length + 1) + '" style="padding:24px;color:#999;">暂无定型方案，请在「XM方案明细」中将方案勾选为「定型」</td>';
+    priceTableBody.appendChild(tr);
+    return;
+  }
+  list.forEach(function (item) {
+    var tr = document.createElement('tr');
+    var _seqNum = parseInt(item['序列'], 10);
+    if (!isNaN(_seqNum) && _seqNum % 2 === 0) tr.className = 'row-even';
+    // 操作列：删除 / 编辑 / 定型 三个按钮纵向排列（操作同步作用于 XM 源数据）
+    var tdOp = document.createElement('td');
+    tdOp.className = 'op-cell';
+    var rowIdx = item.__idx;
+    var isEditing = (priceEditingIdx === rowIdx);
+    var del = document.createElement('button');
+    del.className = 'op-btn del-btn';
+    del.textContent = '删除';
+    del.onclick = (function (ri) { return function () { deleteRow(ri); }; })(rowIdx);
+    tdOp.appendChild(del);
+    var editBtn = document.createElement('button');
+    if (isEditing) {
+      editBtn.className = 'op-btn done-btn';
+      editBtn.textContent = '完成';
+      editBtn.onclick = (function () { return function () { priceEditingIdx = null; renderPrice(); }; })();
+    } else {
+      editBtn.className = 'op-btn edit-btn';
+      editBtn.textContent = '编辑';
+      editBtn.onclick = (function (ri) { return function () { priceEditingIdx = rowIdx; renderPrice(); }; })(rowIdx);
+    }
+    tdOp.appendChild(editBtn);
+    var finalized = !!rawData[rowIdx]['定型'];
+    var finBtn = document.createElement('button');
+    finBtn.className = 'op-btn finalize-btn' + (finalized ? ' finalized' : '');
+    finBtn.textContent = finalized ? '☑ 已定型' : '☐ 定型';
+    finBtn.onclick = (function (ri) { return function () { toggleFinalize(ri); }; })(rowIdx);
+    tdOp.appendChild(finBtn);
+    tr.appendChild(tdOp);
+    // 数据列（列标题与 XM 一致）
+    priceViewColumns.forEach(function (col) {
+      var td = document.createElement('td');
+      if (priceEditingIdx === item.__idx) {
+        var input = document.createElement('input');
+        input.className = 'cell-input';
+        input.value = (rawData[item.__idx][col] === undefined || rawData[item.__idx][col] === null) ? '' : rawData[item.__idx][col];
+        td.appendChild(input);
+        input.onblur = (function (ri, c, inp) { return function () { commitPriceEdit(inp, ri, c); }; })(item.__idx, col, input);
+        input.onkeydown = function (e) {
+          if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
+          else if (e.key === 'Escape') { priceEditingIdx = null; renderPrice(); }
+        };
+      } else {
+        var val = item[col];
+        td.textContent = (val === '' || val === null || val === undefined) ? '' : val;
+        if (col === '序列') {
+          // 序列号在价格视图中为自动生成，仅展示（不可点击新增变更，避免与 XM 源混淆）
+          td.style.fontWeight = '600';
+          td.style.color = '#1a73e8';
+        } else {
+          td.style.cursor = 'pointer';
+          td.onclick = (function (ri, c) { return function () { startPriceEdit(td, ri, c); }; })(item.__idx, col);
+        }
+      }
+      tr.appendChild(td);
+    });
+    priceTableBody.appendChild(tr);
+  });
+}
+
+function startPriceEdit(td, rowIdx, col) {
+  if (td.querySelector('input')) return;
+  var input = document.createElement('input');
+  input.value = rawData[rowIdx][col] || '';
+  td.innerHTML = '';
+  td.appendChild(input);
+  input.focus();
+  input.onblur = function () { finishPriceEdit(td, rowIdx, col, input.value); };
+  input.onkeydown = function (e) {
+    if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
+    else if (e.key === 'Escape') { renderPrice(); }
+  };
+}
+
+function finishPriceEdit(td, rowIdx, col, val) {
+  if (rawData[rowIdx][col] !== val) {
+    rawData[rowIdx][col] = val;
+    // 合并列编辑时，同步到同一方案（XM 序列号相同）的所有变更行
+    if (MERGE_COLS.indexOf(col) !== -1) {
+      var pid = String(rawData[rowIdx]['序列']);
+      rawData.forEach(function (r) { if (String(r['序列']) === pid) r[col] = val; });
+    }
+    persistData();
+    renderPrice();
+    scheduleSync();
+  }
+}
+
+function editPriceRow(rowIdx) { priceEditingIdx = rowIdx; renderPrice(); }
+
+// 编辑模式下提交单个单元格（仅保存，不重渲染，避免失焦竞态；由「完成」统一退出）
+function commitPriceEdit(input, rowIdx, col) {
+  var val = input.value;
+  rawData[rowIdx][col] = val;
+  if (MERGE_COLS.indexOf(col) !== -1) {
+    var pid = String(rawData[rowIdx]['序列']);
+    rawData.forEach(function (r) { if (String(r['序列']) === pid) r[col] = val; });
+  }
+  persistData();
+  scheduleSync();
+}
+
+// 价格视图不再单独维护数据：所有操作都作用于 XM 源数据（deleteRow/toggleFinalize 已复用）
+
+// 视图切换：两个界面共用同一标题栏（均含 XM方案明细 / 价格明细 两个标题）
+function showView(name) {
+  currentView = name;
+  document.getElementById('xmView').style.display = (name === 'xm') ? '' : 'none';
+  document.getElementById('priceView').style.display = (name === 'price') ? '' : 'none';
+  document.getElementById('navXm').classList.toggle('active', name === 'xm');
+  document.getElementById('navPrice').classList.toggle('active', name === 'price');
+  if (name === 'xm') render(); else renderPrice();
 }
 
 // ==================== 增删 ====================
@@ -395,7 +603,7 @@ function addRow() {
     定型: false
   });
   persistData();
-  render();
+  applyFilters();
   scheduleSync();
 }
 
@@ -404,7 +612,7 @@ function deleteRow(idx) {
   rawData.splice(idx, 1);
   renumberSchemes(); // 删除方案后，剩余方案重新连续编号
   persistData();
-  render();
+  applyFilters();
   scheduleSync();
 }
 
@@ -460,12 +668,13 @@ function submitChange() {
   rawData.splice(topIdx, 0, newRow);
   closeChangeModal();
   persistData();
-  render();
+  applyFilters();
   scheduleSync();
   showToast('✅ 已为方案 #' + pid + ' 新增变更', 'success');
 }
 
 // ==================== 数据持久化（同步前更新脚本内容） ====================
+// 价格明细由 XM 数据自动生成，无需单独存储
 function persistData() {
   document.getElementById('xmData').textContent = 'var rawData = ' + JSON.stringify(rawData) + ';';
 }
@@ -614,9 +823,11 @@ async function downloadFromGitHub(auto) {
     var newData = new Function(m[1] + '\n; return rawData;')();
     if (!Array.isArray(newData)) throw new Error('数据格式错误');
     rawData = newData;
+    // 价格明细由 rawData 中已定型行自动生成，无需单独提取
     render();
+    renderPrice();
     updateSyncStatus('idle', '已同步');
-    if (!auto) showToast('✅ 已从 GitHub 下载 ' + rawData.length + ' 条', 'success');
+    if (!auto) showToast('✅ 已从 GitHub 下载 ' + rawData.length + ' 条（价格明细由定型方案自动生成）', 'success');
   } catch (e) {
     if (!auto) { updateSyncStatus('error', '下载失败'); showToast('❌ 下载失败: ' + e.message, 'error'); }
   }
