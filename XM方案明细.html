@@ -1,0 +1,570 @@
+<html lang="zh-CN"><script type="text/javascript" src="chrome-extension://jhdpnjlknkdniefpnngedgkhhhabcmgl/hook-framework.umd.js"></script><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>XM方案明细</title>
+<style>
+  * { box-sizing: border-box; font-family: "Microsoft YaHei", "PingFang SC", sans-serif; }
+  html, body { margin: 0; padding: 0; background: #f5f7fa; color: #333; }
+  .header {
+    background: linear-gradient(135deg, #1a73e8, #0d47a1);
+    color: white; padding: 14px 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+  }
+  .header h1 { margin: 0; font-size: 20px; font-weight: 600; }
+  .header .actions { display: flex; gap: 8px; align-items: center; }
+  .toolbar {
+    display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end;
+    padding: 12px 20px; background: #fff; border-bottom: 1px solid #eee;
+  }
+  .btn {
+    padding: 7px 14px; border: none; border-radius: 6px; cursor: pointer;
+    font-size: 13px; font-weight: 500; transition: all 0.2s; white-space: nowrap;
+  }
+  .btn-primary { background: #1a73e8; color: #fff; }
+  .btn-primary:hover { background: #1557b0; }
+  .btn-success { background: #07c160; color: #fff; }
+  .btn-success:hover { background: #06ad56; }
+  .btn-outline { background: #fff; color: #555; border: 1px solid #ddd; }
+  .btn-outline:hover { border-color: #1a73e8; color: #1a73e8; }
+  .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+  .filters { display: flex; flex-wrap: nowrap; gap: 8px; padding: 10px 12px; background: #fafbfc; border-bottom: 1px solid #eee; }
+  .filters input {
+    flex: 1 1 0; min-width: 0; padding: 6px 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 12px; outline: none;
+  }
+  .filters input:focus { border-color: #1a73e8; box-shadow: 0 0 0 2px rgba(26,115,232,0.15); }
+  .table-wrapper { margin: 12px 20px 80px; background: #fff; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); overflow: hidden; }
+  .table-scroll { overflow: auto; max-height: calc(100vh - 240px); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead th {
+    position: sticky; top: 0; background: #f7f8fa; color: #444; font-weight: 600;
+    padding: 10px 12px; text-align: center; border-bottom: 2px solid #e8e8e8; white-space: nowrap; z-index: 2;
+  }
+  tbody td { padding: 8px 12px; border-bottom: 1px solid #f0f0f0; color: #444; text-align: center; position: relative; }
+  tbody tr:hover { background: #f5f8ff; }
+  tbody td[contenteditable], tbody td input { width: 100%; border: none; text-align: center; background: transparent; outline: none; font-size: 13px; }
+  tbody td input:focus { background: #fffbe6; box-shadow: inset 0 0 0 2px #ffd666; border-radius: 4px; }
+  .del-btn { background: #ff4d4f; color: #fff; border: none; border-radius: 4px; padding: 4px 10px; cursor: pointer; font-size: 12px; }
+  .del-btn:hover { background: #e63a3c; }
+  .empty-cell { color: #bbb; }
+  .sync-status {
+    position: fixed; bottom: 16px; right: 16px; padding: 8px 14px; border-radius: 6px;
+    font-size: 13px; color: #fff; z-index: 900; box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .sync-status.idle { background: #07c160; }
+  .sync-status.syncing { background: #1a73e8; }
+  .sync-status.error { background: #ff4d4f; }
+  .sync-dot { width: 8px; height: 8px; border-radius: 50%; background: #fff; }
+  .sync-status.syncing .sync-dot { animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+  .modal {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+    display: none; align-items: center; justify-content: center; z-index: 1000;
+  }
+  .modal.show { display: flex; }
+  .modal-box { background: #fff; border-radius: 12px; padding: 24px; width: 420px; max-width: 92vw; max-height: 88vh; overflow: auto; }
+  .modal-box h3 { margin: 0 0 16px; font-size: 17px; color: #222; }
+  .modal-box label { display: block; font-size: 13px; color: #555; margin: 12px 0 4px; }
+  .modal-box input { width: 100%; padding: 8px 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; outline: none; }
+  .modal-box input:focus { border-color: #1a73e8; }
+  .modal-box .hint { font-size: 11px; color: #999; margin-top: 4px; }
+  .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+  .modal-actions .btn { flex: 1; }
+  .test-result { font-size: 13px; padding: 8px 10px; border-radius: 6px; margin-top: 10px; }
+  .test-result.success { background: #e8f8ef; color: #07c160; }
+  .test-result.fail { background: #fdeaea; color: #ff4d4f; }
+  .seq-cell { color: #1a73e8; font-weight: 600; cursor: pointer; text-decoration: underline; text-decoration-style: dashed; vertical-align: middle; text-align: center; }
+  .seq-cell:hover { background: #eaf2ff; }
+  /* 偶数序列号方案：浅黄背景（覆盖合并单元格默认的浅灰背景） */
+  tr.row-even td { background: #fff9c4 !important; }
+  tr.row-even td.seq-cell:hover { background: #eaf2ff !important; }
+  .merge-cell { background: #fafbfc; vertical-align: middle; }
+  .readonly-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 12px; margin-bottom: 4px; }
+  .ro-item label { font-size: 12px; color: #888; margin: 0 0 2px; }
+  .ro-val { font-size: 13px; color: #333; background: #f5f6f8; border-radius: 6px; padding: 6px 8px; min-height: 16px; word-break: break-all; }
+  .modal-box textarea { width: 100%; padding: 8px 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; outline: none; resize: vertical; box-sizing: border-box; }
+  .modal-box textarea:focus { border-color: #1a73e8; }
+  .modal-box input[readonly] { background: #f5f6f8; color: #333; cursor: default; }
+  .toast {
+    position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+    padding: 10px 20px; border-radius: 8px; color: #fff; font-size: 14px; z-index: 1100;
+    opacity: 0; transition: opacity 0.3s; pointer-events: none; box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  }
+  .toast.show { opacity: 1; }
+  .toast.success { background: #07c160; }
+  .toast.error { background: #ff4d4f; }
+  .toast.info { background: #1a73e8; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>XM方案明细</h1>
+  <div class="actions">
+    <span id="syncStatus" class="sync-status syncing"><span class="sync-dot"></span><span id="syncText">同步中...</span></span>
+    <button class="btn btn-success" id="downloadBtn" onclick="downloadFromGitHub()" disabled="">⏳ 下载中...</button>
+    <button class="btn btn-primary" id="syncBtn" onclick="syncToGitHub()" disabled="">⏳ 同步中...</button>
+  </div>
+</div>
+
+<div class="toolbar">
+  <button class="btn btn-success" onclick="addRow()">＋ 新增行</button>
+</div>
+
+<div class="table-wrapper">
+  <div class="filters">
+    <input placeholder="客户" id="f_客户" oninput="applyFilters()">
+    <input placeholder="项目号" id="f_项目号" oninput="applyFilters()">
+    <input placeholder="项目名称" id="f_项目名称" oninput="applyFilters()">
+    <input placeholder="工程师" id="f_工程师" oninput="applyFilters()">
+    <input placeholder="型号" id="f_型号" oninput="applyFilters()">
+  </div>
+  <div class="table-scroll">
+    <table id="dataTable">
+      <thead>
+        <tr>
+          <th style="width:60px;">操作</th>
+          <th style="width:60px;">序列</th>
+          <th>建档日期</th>
+          <th>客户</th>
+          <th>项目号</th>
+          <th>项目名称</th>
+          <th>工程师</th>
+          <th>变更时间</th>
+          <th>工况</th>
+          <th>型号</th>
+          <th>配置</th>
+          <th>其他</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"><tr><td colspan="12" style="padding:24px;color:#999;">暂无数据，点击「＋ 新增行」添加</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 新增变更弹窗 -->
+<div class="modal" id="changeModal">
+  <div class="modal-box">
+    <h3>🔧 新增变更 · 方案 #<span id="chPlanId"></span></h3>
+    <div class="readonly-grid">
+      <div class="ro-item"><label>序列</label><div id="chSeq" class="ro-val"></div></div>
+      <div class="ro-item"><label>建档日期</label><div id="chDate" class="ro-val"></div></div>
+      <div class="ro-item"><label>客户</label><div id="chCustomer" class="ro-val"></div></div>
+      <div class="ro-item"><label>项目号</label><div id="chProjNo" class="ro-val"></div></div>
+      <div class="ro-item"><label>项目名称</label><div id="chProjName" class="ro-val"></div></div>
+      <div class="ro-item"><label>工程师</label><div id="chEngineer" class="ro-val"></div></div>
+    </div>
+    <label>变更时间（自动生成）</label>
+    <input type="text" id="chChangeTime" readonly="">
+    <label>工况</label>
+    <input type="text" id="chCond" placeholder="输入工况">
+    <label>型号</label>
+    <input type="text" id="chModel" placeholder="输入型号">
+    <label>配置</label>
+    <textarea id="chConfig" rows="3" placeholder="输入配置"></textarea>
+    <label>其他</label>
+    <textarea id="chOther" rows="2" placeholder="输入其他"></textarea>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeChangeModal()">取消</button>
+      <button class="btn btn-primary" onclick="submitChange()">✅ 保存变更</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast error">❌ 下载失败: Not Found</div>
+
+<!-- 数据持久化脚本：同步时会先更新此处的 rawData，再提交整个 HTML 文件 -->
+<script id="xmData">var rawData = [];</script>
+
+<script>
+// ==================== 列定义 ====================
+var allColumns = ["序列", "建档日期", "客户", "项目号", "项目名称", "工程师", "变更时间", "工况", "型号", "配置", "其他"];
+// 同一方案的固定列（同一序列号的多条变更合并显示）
+var MERGE_COLS = ["序列", "建档日期", "客户", "项目号", "项目名称", "工程师"];
+
+// 重新连续编号：同一方案（序列号相同）共享一个编号；自底向上编号，使最小的序列号在表格最下方，依次向上递增
+function renumberSchemes() {
+  var counter = 0;
+  var currentSeq = null;
+  for (var i = rawData.length - 1; i >= 0; i--) {
+    var r = rawData[i];
+    if (String(r['序列']) !== String(currentSeq)) {
+      counter++;
+      currentSeq = r['序列'];
+    }
+    r['序列'] = counter;
+  }
+}
+
+// ==================== 渲染 ====================
+var tableBody = document.getElementById('tableBody');
+
+function render() {
+  tableBody.innerHTML = '';
+  var list = getFiltered();
+  if (list.length === 0) {
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td colspan="' + (allColumns.length + 1) + '" style="padding:24px;color:#999;">暂无数据，点击「＋ 新增行」添加</td>';
+    tableBody.appendChild(tr);
+    return;
+  }
+  // 计算每个方案块（序列连续相同）的起始行与跨度，用于合并单元格
+  list.forEach(function (item, idx) {
+    item._isStart = (idx === 0) || (String(item['序列']) !== String(list[idx - 1]['序列']));
+    if (item._isStart) {
+      var span = 1;
+      while (idx + span < list.length && String(list[idx + span]['序列']) === String(item['序列'])) span++;
+      item._span = span;
+    }
+  });
+  list.forEach(function (item, idx) {
+    var tr = document.createElement('tr');
+    // 偶数序列号的方案行使用浅黄背景，便于区分
+    var _seqNum = parseInt(item['序列'], 10);
+    if (!isNaN(_seqNum) && _seqNum % 2 === 0) tr.className = 'row-even';
+    // 删除按钮
+    var tdOp = document.createElement('td');
+    var del = document.createElement('button');
+    del.className = 'del-btn';
+    del.textContent = '删除';
+    del.onclick = (function (rowIdx) { return function () { deleteRow(rowIdx); }; })(item.__idx);
+    tdOp.appendChild(del);
+    tr.appendChild(tdOp);
+    // 数据列
+    allColumns.forEach(function (col) {
+      // 合并列：非方案起始行不渲染该单元格（由起始行的 rowspan 覆盖）
+      if (MERGE_COLS.indexOf(col) !== -1 && !item._isStart) return;
+      var td = document.createElement('td');
+      var val = item[col];
+      td.textContent = (val === '' || val === null || val === undefined) ? '' : val;
+      if (col === '序列') {
+        // 序列列：同一方案合并显示，点击弹出「新增变更」对话框
+        td.className = 'seq-cell';
+        td.rowSpan = item._span;
+        td.onclick = (function (rowIdx) { return function () { openChangeDialog(rowIdx); }; })(item.__idx);
+      } else if (MERGE_COLS.indexOf(col) !== -1) {
+        // 合并列：起始行带 rowspan，可点击编辑（编辑会同步到该方案所有变更）
+        td.rowSpan = item._span;
+        td.className = 'merge-cell';
+        td.style.cursor = 'pointer';
+        td.onclick = (function (rowIdx, c) { return function () { startEdit(td, rowIdx, c); }; })(item.__idx, col);
+      } else {
+        td.style.cursor = 'pointer';
+        td.onclick = (function (rowIdx, c) { return function () { startEdit(td, rowIdx, c); }; })(item.__idx, col);
+      }
+      tr.appendChild(td);
+    });
+    tableBody.appendChild(tr);
+  });
+}
+
+function getFiltered() {
+  var f = {};
+  allColumns.forEach(function (c) {
+    var el = document.getElementById('f_' + c);
+    if (el && el.value.trim()) f[c] = el.value.trim().toLowerCase();
+  });
+  return rawData.map(function (row, i) { return Object.assign({ __idx: i }, row); }).filter(function (row) {
+    return Object.keys(f).every(function (c) {
+      return (row[c] || '').toString().toLowerCase().indexOf(f[c]) !== -1;
+    });
+  });
+}
+
+function applyFilters() { render(); }
+
+// ==================== 编辑 ====================
+function startEdit(td, rowIdx, col) {
+  if (td.querySelector('input')) return;
+  var input = document.createElement('input');
+  input.value = rawData[rowIdx][col] || '';
+  td.innerHTML = '';
+  td.appendChild(input);
+  input.focus();
+  input.onblur = function () { finishEdit(td, rowIdx, col, input.value); };
+  input.onkeydown = function (e) {
+    if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
+    else if (e.key === 'Escape') { render(); }
+  };
+}
+
+function finishEdit(td, rowIdx, col, val) {
+  if (rawData[rowIdx][col] !== val) {
+    rawData[rowIdx][col] = val;
+    // 合并列编辑时，同步到同一方案（序列号相同）的所有变更行
+    if (MERGE_COLS.indexOf(col) !== -1) {
+      var pid = String(rawData[rowIdx]['序列']);
+      rawData.forEach(function (r) { if (String(r['序列']) === pid) r[col] = val; });
+    }
+    persistData();
+    render();
+    scheduleSync();
+  }
+}
+
+// ==================== 增删 ====================
+// 序列 = 方案编号（同一方案的多条变更共享同一编号；新增取最大号+1，删除方案后由 renumberSchemes 重新连续编号）
+function addRow() {
+  var now = new Date().toLocaleString('zh-CN');
+  var maxSeq = 0;
+  rawData.forEach(function (r) { var n = parseFloat(r['序列']); if (!isNaN(n) && n > maxSeq) maxSeq = n; });
+  rawData.unshift({
+    序列: maxSeq + 1,
+    建档日期: now,
+    客户: '', 项目号: '', 项目名称: '', 工程师: '',
+    变更时间: now, 工况: '', 型号: '', 配置: '', 其他: ''
+  });
+  persistData();
+  render();
+  scheduleSync();
+}
+
+function deleteRow(idx) {
+  if (!confirm('确定删除这条记录吗？')) return;
+  rawData.splice(idx, 1);
+  renumberSchemes(); // 删除方案后，剩余方案重新连续编号
+  persistData();
+  render();
+  scheduleSync();
+}
+
+// ==================== 新增变更（点击序列列弹出） ====================
+var chPlanSeq = null; // 当前操作的方案编号
+
+function openChangeDialog(rowIdx) {
+  var row = rawData[rowIdx];
+  if (!row) return;
+  chPlanSeq = row['序列'];
+  document.getElementById('chPlanId').textContent = row['序列'];
+  document.getElementById('chSeq').textContent = row['序列'] || '';
+  document.getElementById('chDate').textContent = row['建档日期'] || '';
+  document.getElementById('chCustomer').textContent = row['客户'] || '';
+  document.getElementById('chProjNo').textContent = row['项目号'] || '';
+  document.getElementById('chProjName').textContent = row['项目名称'] || '';
+  document.getElementById('chEngineer').textContent = row['工程师'] || '';
+  document.getElementById('chChangeTime').value = new Date().toLocaleString('zh-CN');
+  document.getElementById('chCond').value = '';
+  document.getElementById('chModel').value = '';
+  document.getElementById('chConfig').value = '';
+  document.getElementById('chOther').value = '';
+  document.getElementById('changeModal').classList.add('show');
+  setTimeout(function () { document.getElementById('chCond').focus(); }, 50);
+}
+
+function closeChangeModal() {
+  document.getElementById('changeModal').classList.remove('show');
+  chPlanSeq = null;
+}
+
+function submitChange() {
+  if (chPlanSeq === null && chPlanSeq !== 0) { showToast('无效方案', 'error'); return; }
+  var pid = chPlanSeq;
+  // 从现有方案第一条读取固定字段（建档日期/客户/项目号/项目名称/工程师）
+  var src = rawData.find(function (r) { return String(r['序列']) === String(pid); });
+  if (!src) { showToast('未找到该方案', 'error'); return; }
+  var now = new Date().toLocaleString('zh-CN');
+  var newRow = {
+    序列: pid,
+    建档日期: src['建档日期'],
+    客户: src['客户'], 项目号: src['项目号'], 项目名称: src['项目名称'], 工程师: src['工程师'],
+    变更时间: now,
+    工况: document.getElementById('chCond').value.trim(),
+    型号: document.getElementById('chModel').value.trim(),
+    配置: document.getElementById('chConfig').value.trim(),
+    其他: document.getElementById('chOther').value.trim()
+  };
+  // 插入到该方案在表格中的最上方
+  var topIdx = rawData.findIndex(function (r) { return String(r['序列']) === String(pid); });
+  if (topIdx === -1) topIdx = 0;
+  rawData.splice(topIdx, 0, newRow);
+  closeChangeModal();
+  persistData();
+  render();
+  scheduleSync();
+  showToast('✅ 已为方案 #' + pid + ' 新增变更', 'success');
+}
+
+// ==================== 数据持久化（同步前更新脚本内容） ====================
+function persistData() {
+  document.getElementById('xmData').textContent = 'var rawData = ' + JSON.stringify(rawData) + ';';
+}
+
+// ==================== GitHub 配置 ====================
+// 默认仓库/文件路径取自 XM方案明细（项目资产）。Token 仅通过头部输入框填入，不写入文件内容。
+var DEFAULT_GH = {
+  user: 'maidang0706',
+  repo: 'OPP3',
+  token: '',
+  filePath: 'XM方案明细.html',
+  commitMsg: 'Update XM方案明细'
+};
+
+function loadGitHubSettings() {
+  try {
+    var saved = localStorage.getItem('xm_github_settings');
+    if (!saved) {
+      saved = JSON.stringify(DEFAULT_GH);
+      localStorage.setItem('xm_github_settings', saved);
+    }
+    updateSyncStatus('idle', '已配置');
+  } catch (e) {}
+}
+
+// 获取配置：user/repo/filePath 固定，token 从 localStorage 读取，未设置则弹窗输入
+function getGitHubSettings() {
+  var saved = localStorage.getItem('xm_github_settings');
+  var s = saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(DEFAULT_GH));
+  return s;
+}
+
+// ==================== GitHub同步 ====================
+function updateSyncStatus(status, text) {
+  var dot = document.querySelector('#syncStatus .sync-dot');
+  var txt = document.getElementById('syncText');
+  var el = document.getElementById('syncStatus');
+  el.className = 'sync-status ' + status;
+  txt.textContent = text || (status === 'idle' ? '已配置' : status === 'syncing' ? '同步中...' : '同步失败');
+}
+
+async function syncToGitHub() {
+  var settings = getGitHubSettings();
+  if (!settings.token) {
+    var t = prompt('请输入 GitHub Token：');
+    if (!t) return;
+    settings.token = t.trim();
+    localStorage.setItem('xm_github_settings', JSON.stringify(settings));
+  }
+  if (!settings.user || !settings.repo) { showToast('配置错误', 'error'); return; }
+  updateSyncStatus('syncing', '同步中...');
+  var btn = document.getElementById('syncBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ 同步中...';
+
+  try {
+    // 同步前确保脚本中的 rawData 为最新
+    persistData();
+    var htmlContent = document.documentElement.outerHTML;
+    // 先获取文件 SHA（若已存在）
+    var sha = null;
+    var url = 'https://api.github.com/repos/' + encodeURIComponent(settings.user) + '/' + encodeURIComponent(settings.repo) + '/contents/' + encodeURIComponent(settings.filePath);
+    var headers = {
+      'Authorization': 'token ' + settings.token,
+      'Accept': 'application/vnd.github.v3+json'
+    };
+    try {
+      var getResp = await fetch(url, { headers: headers });
+      if (getResp.ok) {
+        var getData = await getResp.json();
+        sha = getData.sha;
+      }
+    } catch (e) {}
+
+    var base64Content = btoa(unescape(encodeURIComponent(htmlContent)));
+    var body = {
+      message: settings.commitMsg,
+      content: base64Content,
+      branch: 'main'
+    };
+    if (sha) body.sha = sha;
+
+    var putResp = await fetch(url, {
+      method: 'PUT',
+      headers: headers,
+      body: JSON.stringify(body)
+    });
+
+    if (putResp.ok) {
+      var result = await putResp.json();
+      updateSyncStatus('idle', '已同步');
+      showToast('✅ 同步成功！' + (result.content.html_url || ''), 'success');
+    } else {
+      var errData = await putResp.json();
+      updateSyncStatus('error', '同步失败');
+      showToast('❌ 同步失败: ' + (errData.message || '未知错误'), 'error');
+    }
+  } catch (e) {
+    updateSyncStatus('error', '同步失败');
+    showToast('❌ 网络错误: ' + e.message, 'error');
+  }
+  btn.disabled = false;
+  btn.textContent = '🔄 同步到 GitHub';
+}
+
+// 编辑后自动（防抖）同步
+var _syncTimer = null;
+function scheduleSync() {
+  clearTimeout(_syncTimer);
+  var s = getGitHubSettings();
+  if (!s.token) return;
+  _syncTimer = setTimeout(function () { syncToGitHub(); }, 1500);
+}
+
+// ==================== 从 GitHub 下载（公开仓库无需 Token） ====================
+// auto=true 时为打开文件时自动调用：404（仓库中尚无文件）静默跳过，不弹错误
+async function downloadFromGitHub(auto) {
+  var settings = getGitHubSettings();
+  if (!settings.user || !settings.repo) { if (!auto) showToast('配置错误', 'error'); return; }
+  if (!auto) {
+    updateSyncStatus('syncing', '下载中...');
+    var btn = document.getElementById('downloadBtn');
+    btn.disabled = true;
+    btn.textContent = '⏳ 下载中...';
+  }
+  try {
+    var url = 'https://api.github.com/repos/' + encodeURIComponent(settings.user) + '/' + encodeURIComponent(settings.repo) + '/contents/' + encodeURIComponent(settings.filePath);
+    // 有 Token 则带上（提高限额），没有也能下载公开仓库
+    var headers = { 'Accept': 'application/vnd.github.v3+json' };
+    if (settings.token) headers['Authorization'] = 'token ' + settings.token;
+    var resp = await fetch(url, { headers: headers });
+    if (!resp.ok) {
+      if (auto && resp.status === 404) return; // 尚未上传，静默跳过
+      var err = await resp.json().catch(function(){return {};});
+      if (!auto) { updateSyncStatus('error', '下载失败'); showToast('❌ 下载失败: ' + (err.message || '未知错误'), 'error'); }
+      return;
+    }
+    var data = await resp.json();
+    var htmlStr = decodeURIComponent(escape(atob(data.content.replace(/\s/g, ''))));
+    // 提取仓库文件中的 rawData
+    var m = htmlStr.match(/<script id="xmData">([\s\S]*?)<\/script>/);
+    if (!m) {
+      if (!auto) { updateSyncStatus('error', '下载失败'); showToast('❌ 文件中未找到数据', 'error'); }
+      return;
+    }
+    var newData = new Function(m[1] + '\n; return rawData;')();
+    if (!Array.isArray(newData)) throw new Error('数据格式错误');
+    rawData = newData;
+    render();
+    updateSyncStatus('idle', '已同步');
+    if (!auto) showToast('✅ 已从 GitHub 下载 ' + rawData.length + ' 条', 'success');
+  } catch (e) {
+    if (!auto) { updateSyncStatus('error', '下载失败'); showToast('❌ 下载失败: ' + e.message, 'error'); }
+  }
+  if (!auto) {
+    btn.disabled = false;
+    btn.textContent = '📥 从 GitHub 下载';
+  }
+}
+
+// ==================== Toast ====================
+function showToast(msg, type) {
+  var toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.className = 'toast ' + (type || 'info') + ' show';
+  clearTimeout(toast._timeout);
+  toast._timeout = setTimeout(function () { toast.classList.remove('show'); }, 3000);
+}
+
+// ==================== 初始化 ====================
+loadGitHubSettings();
+render();
+// 点击遮罩关闭变更弹窗
+document.getElementById('changeModal').addEventListener('click', function (e) {
+  if (e.target === this) closeChangeModal();
+});
+// 打开文件时自动从 GitHub 拉取最新数据
+downloadFromGitHub(true);
+</script>
+
+
+</body></html>
