@@ -38,9 +38,9 @@
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
   thead th {
     position: sticky; top: 0; background: #f7f8fa; color: #444; font-weight: 600;
-    padding: 10px 12px; text-align: center; border-bottom: 2px solid #e8e8e8; white-space: nowrap; z-index: 2;
+    padding: 6px 12px; text-align: center; border-bottom: 2px solid #e8e8e8; white-space: nowrap; z-index: 2;
   }
-  tbody td { padding: 8px 12px; border-bottom: 1px solid #f0f0f0; color: #444; text-align: center; position: relative; }
+  tbody td { padding: 4px 12px; border-bottom: 1px solid #f0f0f0; color: #444; text-align: center; position: relative; line-height: 1.35; }
   tbody tr:hover { background: #f5f8ff; }
   tbody td[contenteditable], tbody td input { width: 100%; border: none; text-align: center; background: transparent; outline: none; font-size: 13px; }
   tbody td input:focus { background: #fffbe6; box-shadow: inset 0 0 0 2px #ffd666; border-radius: 4px; }
@@ -159,7 +159,7 @@
           <th>其他</th>
         </tr>
       </thead>
-      <tbody id="tableBody"><tr class="row-even finalized-row"><td class="op-cell"><button class="op-btn del-btn">删除</button><button class="op-btn edit-btn">编辑</button><button class="op-btn finalize-btn finalized">☑ 已定型</button></td><td class="seq-cell" rowspan="1">2</td><td rowspan="1" class="merge-cell" style="cursor: pointer;">2026/7/24 13:27:39</td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td style="cursor: pointer;">2026/7/24 13:27:39</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td></tr><tr><td class="op-cell"><button class="op-btn del-btn">删除</button><button class="op-btn edit-btn">编辑</button><button class="op-btn finalize-btn">☐ 定型</button></td><td class="seq-cell" rowspan="1">1</td><td rowspan="1" class="merge-cell" style="cursor: pointer;">2026/7/24 13:27:38</td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td style="cursor: pointer;">2026/7/24 13:27:38</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td></tr></tbody>
+      <tbody id="tableBody"><tr><td class="op-cell"><button class="op-btn del-btn">删除</button><button class="op-btn edit-btn">编辑</button><button class="op-btn finalize-btn">☐ 定型</button></td><td class="seq-cell" rowspan="1">3</td><td rowspan="1" class="merge-cell" style="cursor: pointer;">2026/7/25 17:12:14</td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td style="cursor: pointer;">2026/7/25 17:12:14</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td></tr><tr class="row-even finalized-row"><td class="op-cell"><button class="op-btn del-btn">删除</button><button class="op-btn edit-btn">编辑</button><button class="op-btn finalize-btn finalized">☑ 已定型</button></td><td class="seq-cell" rowspan="1">2</td><td rowspan="1" class="merge-cell" style="cursor: pointer;">2026/7/24 13:27:39</td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td style="cursor: pointer;">2026/7/24 13:27:39</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td></tr><tr><td class="op-cell"><button class="op-btn del-btn">删除</button><button class="op-btn edit-btn">编辑</button><button class="op-btn finalize-btn">☐ 定型</button></td><td class="seq-cell" rowspan="1">1</td><td rowspan="1" class="merge-cell" style="cursor: pointer;">2026/7/24 13:27:38</td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td style="cursor: pointer;">2026/7/24 13:27:38</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td></tr></tbody>
     </table>
   </div>
 </div>
@@ -196,7 +196,7 @@
             <th>其他</th>
           </tr>
         </thead>
-        <tbody id="priceTableBody"><tr><td colspan="12" style="padding:24px;color:#999;">暂无定型方案，请在「XM方案明细」中将方案勾选为「定型」</td></tr></tbody>
+        <tbody id="priceTableBody"><tr><td class="op-cell"><button class="op-btn del-btn">删除</button><button class="op-btn edit-btn">编辑</button><button class="op-btn finalize-btn finalized">☑ 已定型</button></td><td style="font-weight: 600; color: rgb(26, 115, 232);">1</td><td style="cursor: pointer;">2026/7/24 13:27:39</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;">2026/7/24 13:27:39</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td></tr></tbody>
       </table>
     </div>
   </div>
@@ -234,7 +234,7 @@
 <div id="toast" class="toast"></div>
 
 <!-- 数据持久化脚本：同步时会先更新此处的 rawData，再提交整个 HTML 文件 -->
-<script id="xmData">var rawData = [{"序列":2,"建档日期":"2026/7/24 13:27:39","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/24 13:27:39","工况":"","型号":"","配置":"","其他":"","定型":true},{"序列":1,"建档日期":"2026/7/24 13:27:38","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/24 13:27:38","工况":"","型号":"","配置":"","其他":""}];</script>
+<script id="xmData">var rawData = [{"序列":3,"建档日期":"2026/7/25 17:12:14","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/25 17:12:14","工况":"","型号":"","配置":"","其他":"","定型":false},{"序列":2,"建档日期":"2026/7/24 13:27:39","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/24 13:27:39","工况":"","型号":"","配置":"","其他":"","定型":true},{"序列":1,"建档日期":"2026/7/24 13:27:38","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/24 13:27:38","工况":"","型号":"","配置":"","其他":""}];</script>
 
 <script>
 // ==================== 列定义 ====================
@@ -264,7 +264,7 @@ function render() {
   var list = getFiltered();
   if (list.length === 0) {
     var tr = document.createElement('tr');
-    tr.innerHTML = '<td colspan="' + (allColumns.length + 1) + '" style="padding:24px;color:#999;">暂无数据，点击「＋ 新增行」添加</td>';
+    tr.innerHTML = '<td colspan="' + (allColumns.length + 1) + '" style="padding:14px;color:#999;">暂无数据，点击「＋ 新增行」添加</td>';
     tableBody.appendChild(tr);
     return;
   }
@@ -468,7 +468,7 @@ function renderPrice() {
   var list = getPriceFiltered();
   if (list.length === 0) {
     var tr = document.createElement('tr');
-    tr.innerHTML = '<td colspan="' + (priceViewColumns.length + 1) + '" style="padding:24px;color:#999;">暂无定型方案，请在「XM方案明细」中将方案勾选为「定型」</td>';
+    tr.innerHTML = '<td colspan="' + (priceViewColumns.length + 1) + '" style="padding:14px;color:#999;">暂无定型方案，请在「XM方案明细」中将方案勾选为「定型」</td>';
     priceTableBody.appendChild(tr);
     return;
   }
