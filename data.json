@@ -112,6 +112,10 @@
   .toast.success { background: #07c160; }
   .toast.error { background: #ff4d4f; }
   .toast.info { background: #1a73e8; }
+  /* 配置列模板：（）内蓝底 */
+  .cfg-fill { background: #1a73e8; color: #fff; border-radius: 3px; padding: 0 5px; }
+  .cfg-input { background: #1a73e8; color: #fff; border: 1px solid #1557b0; border-radius: 4px; padding: 2px 5px; font-size: 12px; width: 100px; outline: none; box-sizing: border-box; }
+  .cfg-input::placeholder { color: #bcd4f8; }
 </style>
 </head>
 <body>
@@ -128,7 +132,7 @@
   </div>
 </div>
 
-<div id="xmView" style="">
+<div id="xmView">
 <div class="toolbar">
   <button class="btn btn-success" onclick="addRow()">＋ 新增行</button>
 </div>
@@ -159,14 +163,14 @@
           <th>其他</th>
         </tr>
       </thead>
-      <tbody id="tableBody"><tr class="row-even finalized-row"><td class="op-cell"><button class="op-btn del-btn">删除</button><button class="op-btn edit-btn">编辑</button><button class="op-btn finalize-btn finalized">☑ 已定型</button></td><td class="seq-cell" rowspan="1">4</td><td rowspan="1" class="merge-cell" style="cursor: pointer;">2026/7/25 17:12:21</td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td style="cursor: pointer;">2026/7/25 17:12:21</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td></tr><tr><td class="op-cell"><button class="op-btn del-btn">删除</button><button class="op-btn edit-btn">编辑</button><button class="op-btn finalize-btn">☐ 定型</button></td><td class="seq-cell" rowspan="1">3</td><td rowspan="1" class="merge-cell" style="cursor: pointer;">2026/7/25 17:12:14</td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td style="cursor: pointer;">2026/7/25 17:12:14</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td></tr><tr class="row-even finalized-row"><td class="op-cell"><button class="op-btn del-btn">删除</button><button class="op-btn edit-btn">编辑</button><button class="op-btn finalize-btn finalized">☑ 已定型</button></td><td class="seq-cell" rowspan="1">2</td><td rowspan="1" class="merge-cell" style="cursor: pointer;">2026/7/24 13:27:39</td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td style="cursor: pointer;">2026/7/24 13:27:39</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td></tr><tr><td class="op-cell"><button class="op-btn del-btn">删除</button><button class="op-btn edit-btn">编辑</button><button class="op-btn finalize-btn">☐ 定型</button></td><td class="seq-cell" rowspan="1">1</td><td rowspan="1" class="merge-cell" style="cursor: pointer;">2026/7/24 13:27:38</td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td style="cursor: pointer;">2026/7/24 13:27:38</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td></tr></tbody>
+      <tbody id="tableBody"><tr class="row-even finalized-row"><td class="op-cell"><button class="op-btn del-btn">删除</button><button class="op-btn done-btn">完成</button><button class="op-btn finalize-btn finalized">☑ 已定型</button></td><td><input class="cell-input"></td><td><input class="cell-input"></td><td><input class="cell-input"></td><td><input class="cell-input"></td><td><input class="cell-input"></td><td><input class="cell-input"></td><td><input class="cell-input"></td><td><input class="cell-input"></td><td><input class="cell-input"></td><td class="" style="padding: 4px 6px; text-align: left; vertical-align: top;"><div style="margin: 2px 0px;"><span>电机</span>（<input class="cfg-input" placeholder="填写">）</div><div style="margin: 2px 0px;"><span>动子个数</span>（<input class="cfg-input" placeholder="填写">）</div><div style="margin: 2px 0px;"><span>驱动器型号</span>（<input class="cfg-input" placeholder="填写">）</div><div style="margin: 2px 0px;"><span>光电开关</span>（<input class="cfg-input" placeholder="填写">）</div><div style="margin: 2px 0px;"><span>导轨品牌</span>（<input class="cfg-input" placeholder="填写">）</div><div style="margin: 2px 0px;"><span>读头</span>（<input class="cfg-input" placeholder="填写">）</div><div style="margin: 2px 0px;"><span>动力线</span>（<input class="cfg-input" placeholder="填写">）</div><div style="margin: 2px 0px;"><span>编码器线</span>（<input class="cfg-input" placeholder="填写">）</div><div style="margin: 2px 0px;"><span>图纸来源</span>（<input class="cfg-input" placeholder="填写">）</div><div style="margin: 2px 0px;"><span>刹车电阻</span>（<input class="cfg-input" placeholder="填写">）</div><div style="margin: 2px 0px;"><span>其他备注</span>（<input class="cfg-input" placeholder="填写">）</div></td><td><input class="cell-input"></td></tr><tr><td class="op-cell"><button class="op-btn del-btn">删除</button><button class="op-btn edit-btn">编辑</button><button class="op-btn finalize-btn">☐ 定型</button></td><td class="seq-cell" rowspan="1"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td style="cursor: pointer;">2026/7/25 17:12:14</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer; text-align: left;">电机（<span class="cfg-fill"></span>）动子个数（<span class="cfg-fill"></span>）驱动器型号（<span class="cfg-fill"></span>）光电开关（<span class="cfg-fill"></span>）导轨品牌（<span class="cfg-fill"></span>）读头（<span class="cfg-fill"></span>）动力线（<span class="cfg-fill"></span>）编码器线（<span class="cfg-fill"></span>）图纸来源（<span class="cfg-fill"></span>）刹车电阻（<span class="cfg-fill"></span>）其他备注（<span class="cfg-fill"></span>）</td><td style="cursor: pointer;"></td></tr><tr class="row-even finalized-row"><td class="op-cell"><button class="op-btn del-btn">删除</button><button class="op-btn edit-btn">编辑</button><button class="op-btn finalize-btn finalized">☑ 已定型</button></td><td class="seq-cell" rowspan="1"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td style="cursor: pointer;">2026/7/24 13:27:39</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer; text-align: left;">电机（<span class="cfg-fill"></span>）动子个数（<span class="cfg-fill"></span>）驱动器型号（<span class="cfg-fill"></span>）光电开关（<span class="cfg-fill"></span>）导轨品牌（<span class="cfg-fill"></span>）读头（<span class="cfg-fill"></span>）动力线（<span class="cfg-fill"></span>）编码器线（<span class="cfg-fill"></span>）图纸来源（<span class="cfg-fill"></span>）刹车电阻（<span class="cfg-fill"></span>）其他备注（<span class="cfg-fill"></span>）</td><td style="cursor: pointer;"></td></tr><tr><td class="op-cell"><button class="op-btn del-btn">删除</button><button class="op-btn edit-btn">编辑</button><button class="op-btn finalize-btn">☐ 定型</button></td><td class="seq-cell" rowspan="1"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td style="cursor: pointer;">2026/7/24 13:27:38</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer; text-align: left;">电机（<span class="cfg-fill"></span>）动子个数（<span class="cfg-fill"></span>）驱动器型号（<span class="cfg-fill"></span>）光电开关（<span class="cfg-fill"></span>）导轨品牌（<span class="cfg-fill"></span>）读头（<span class="cfg-fill"></span>）动力线（<span class="cfg-fill"></span>）编码器线（<span class="cfg-fill"></span>）图纸来源（<span class="cfg-fill"></span>）刹车电阻（<span class="cfg-fill"></span>）其他备注（<span class="cfg-fill"></span>）</td><td style="cursor: pointer;"></td></tr></tbody>
     </table>
   </div>
 </div>
 </div><!-- /xmView -->
 
 <!-- 价格明细视图（由 XM 中已「定型」的行自动生成，列标题与 XM 一致） -->
-<div id="priceView" style="display: none;">
+<div id="priceView" style="display:none">
   <div class="toolbar">
     <span style="font-size:13px;color:#888;align-self:center;">本表由「XM方案明细」中已勾选为「定型」的方案自动生成，无需手动添加</span>
   </div>
@@ -196,7 +200,7 @@
             <th>其他</th>
           </tr>
         </thead>
-        <tbody id="priceTableBody"><tr><td class="op-cell"><button class="op-btn del-btn">删除</button><button class="op-btn edit-btn">编辑</button><button class="op-btn finalize-btn finalized">☑ 已定型</button></td><td style="font-weight: 600; color: rgb(26, 115, 232);">1</td><td style="cursor: pointer;">2026/7/24 13:27:39</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;">2026/7/24 13:27:39</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td></tr></tbody>
+        <tbody id="priceTableBody"><tr class="row-even"><td class="op-cell"><button class="op-btn del-btn">删除</button><button class="op-btn edit-btn">编辑</button><button class="op-btn finalize-btn finalized">☑ 已定型</button></td><td style="font-weight: 600; color: rgb(26, 115, 232);"></td><td style="cursor: pointer;">2026/7/25 17:12:21</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;">2026/7/25 17:12:21</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer; text-align: left;">电机（<span class="cfg-fill"></span>）动子个数（<span class="cfg-fill"></span>）驱动器型号（<span class="cfg-fill"></span>）光电开关（<span class="cfg-fill"></span>）导轨品牌（<span class="cfg-fill"></span>）读头（<span class="cfg-fill"></span>）动力线（<span class="cfg-fill"></span>）编码器线（<span class="cfg-fill"></span>）图纸来源（<span class="cfg-fill"></span>）刹车电阻（<span class="cfg-fill"></span>）其他备注（<span class="cfg-fill"></span>）</td><td style="cursor: pointer;"></td></tr><tr><td class="op-cell"><button class="op-btn del-btn">删除</button><button class="op-btn edit-btn">编辑</button><button class="op-btn finalize-btn finalized">☑ 已定型</button></td><td style="font-weight: 600; color: rgb(26, 115, 232);"></td><td style="cursor: pointer;">2026/7/24 13:27:39</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;">2026/7/24 13:27:39</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer; text-align: left;">电机（<span class="cfg-fill"></span>）动子个数（<span class="cfg-fill"></span>）驱动器型号（<span class="cfg-fill"></span>）光电开关（<span class="cfg-fill"></span>）导轨品牌（<span class="cfg-fill"></span>）读头（<span class="cfg-fill"></span>）动力线（<span class="cfg-fill"></span>）编码器线（<span class="cfg-fill"></span>）图纸来源（<span class="cfg-fill"></span>）刹车电阻（<span class="cfg-fill"></span>）其他备注（<span class="cfg-fill"></span>）</td><td style="cursor: pointer;"></td></tr></tbody>
       </table>
     </div>
   </div>
@@ -231,16 +235,87 @@
   </div>
 </div>
 
-<div id="toast" class="toast success">✅ 同步成功！https://github.com/maidang0706/opp3/blob/main/data.json</div>
+<div id="toast" class="toast"></div>
 
 <!-- 数据持久化脚本：同步时会先更新此处的 rawData，再提交整个 HTML 文件 -->
-<script id="xmData">var rawData = [{"序列":4,"建档日期":"2026/7/25 17:12:21","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/25 17:12:21","工况":"","型号":"","配置":"","其他":"","定型":true},{"序列":3,"建档日期":"2026/7/25 17:12:14","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/25 17:12:14","工况":"","型号":"","配置":"","其他":"","定型":false},{"序列":2,"建档日期":"2026/7/24 13:27:39","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/24 13:27:39","工况":"","型号":"","配置":"","其他":"","定型":true},{"序列":1,"建档日期":"2026/7/24 13:27:38","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/24 13:27:38","工况":"","型号":"","配置":"","其他":""}];</script>
+<script id="xmData">var rawData = [{"序列":4,"建档日期":"2026/7/25 17:12:21","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/25 17:12:21","工况":"","型号":"","配置":"电机（50-M2-S1）动子个数（）驱动器型号（）光电开关（）导轨品牌（）读头（）动力线（）编码器线（）图纸来源（）刹车电阻（）其他备注（）","其他":"","定型":true},{"序列":3,"建档日期":"2026/7/25 17:12:14","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/25 17:12:14","工况":"","型号":"","配置":"","其他":"","定型":false},{"序列":2,"建档日期":"2026/7/24 13:27:39","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/24 13:27:39","工况":"","型号":"","配置":"","其他":"","定型":true},{"序列":1,"建档日期":"2026/7/24 13:27:38","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/24 13:27:38","工况":"","型号":"","配置":"","其他":""}];</script>
 
 <script>
 // ==================== 列定义 ====================
 var allColumns = ["序列", "建档日期", "客户", "项目号", "项目名称", "工程师", "变更时间", "工况", "型号", "配置", "其他"];
 // 同一方案的固定列（同一序列号的多条变更合并显示）
 var MERGE_COLS = ["序列", "建档日期", "客户", "项目号", "项目名称", "工程师"];
+
+// ==================== 配置列模板 ====================
+// 固定文字 + （）可填入；（）内文本蓝底
+var CONFIG_FIELDS = ["电机", "动子个数", "驱动器型号", "光电开关", "导轨品牌", "读头", "动力线", "编码器线", "图纸来源", "刹车电阻", "其他备注"];
+
+function escapeHtml(s) {
+  return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+// 将存储的「配置」字符串解析为 { 字段: 值 }
+function parseConfig(str) {
+  var obj = {};
+  CONFIG_FIELDS.forEach(function (f) {
+    var re = new RegExp(f.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '（([^）]*)）');
+    var m = (str || '').match(re);
+    obj[f] = m ? m[1] : '';
+  });
+  return obj;
+}
+
+// 将 { 字段: 值 } 序列化回模板字符串
+function serializeConfig(obj) {
+  return CONFIG_FIELDS.map(function (f) { return f + '（' + (obj[f] || '') + '）'; }).join('');
+}
+
+// 非编辑态展示：固定文字 + 蓝底（）内容（旧版自由文本原样显示，避免丢失）
+function configDisplay(val) {
+  if (val && !CONFIG_FIELDS.some(function (f) { return String(val).indexOf(f) !== -1; })) {
+    return escapeHtml(val);
+  }
+  var obj = parseConfig(val || '');
+  return CONFIG_FIELDS.map(function (f) {
+    return f + '（<span class="cfg-fill">' + escapeHtml(obj[f] || '') + '</span>）';
+  }).join('');
+}
+
+// 编辑态：每个（）渲染为蓝底输入框，失焦即保存对应字段
+function buildConfigEditor(td, rowIdx, isPrice) {
+  td.className = '';
+  td.style.padding = '4px 6px';
+  td.style.textAlign = 'left';
+  td.style.verticalAlign = 'top';
+  var current = parseConfig(rawData[rowIdx]['配置']);
+  CONFIG_FIELDS.forEach(function (f) {
+    var wrap = document.createElement('div');
+    wrap.style.margin = '2px 0';
+    var label = document.createElement('span');
+    label.textContent = f;
+    var open = document.createTextNode('（');
+    var input = document.createElement('input');
+    input.value = current[f] || '';
+    input.className = 'cfg-input';
+    input.setAttribute('placeholder', '填写');
+    var close = document.createTextNode('）');
+    wrap.appendChild(label); wrap.appendChild(open); wrap.appendChild(input); wrap.appendChild(close);
+    input.onblur = (function (ri, field, inp) {
+      return function () {
+        var o = parseConfig(rawData[ri]['配置']);
+        o[field] = inp.value;
+        rawData[ri]['配置'] = serializeConfig(o);
+        persistData();
+        scheduleSync();
+      };
+    })(rowIdx, f, input);
+    input.onkeydown = function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
+      else if (e.key === 'Escape') { if (isPrice) { priceEditingIdx = null; renderPrice(); } else { editingIdx = null; render(); } }
+    };
+    td.appendChild(wrap);
+  });
+}
 
 // 重新连续编号：同一方案（序列号相同）共享一个编号；自底向上编号，使最小的序列号在表格最下方，依次向上递增
 function renumberSchemes() {
@@ -320,20 +395,30 @@ function render() {
       if (MERGE_COLS.indexOf(col) !== -1 && !item._isStart) return;
       var td = document.createElement('td');
       if (editingIdx === item.__idx) {
-        // 整行编辑模式：渲染输入框
-        var input = document.createElement('input');
-        input.className = 'cell-input';
-        input.value = (rawData[item.__idx][col] === undefined || rawData[item.__idx][col] === null) ? '' : rawData[item.__idx][col];
-        td.appendChild(input);
-        input.onblur = (function (ri, c, inp) { return function () { commitEdit(inp, ri, c); }; })(item.__idx, col, input);
-        input.onkeydown = function (e) {
-          if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
-          else if (e.key === 'Escape') { editingIdx = null; render(); }
-        };
+        if (col === '配置') {
+          // 配置列：模板编辑器（固定文字 + 蓝底输入框）
+          buildConfigEditor(td, item.__idx, false);
+        } else {
+          // 整行编辑模式：渲染输入框
+          var input = document.createElement('input');
+          input.className = 'cell-input';
+          input.value = (rawData[item.__idx][col] === undefined || rawData[item.__idx][col] === null) ? '' : rawData[item.__idx][col];
+          td.appendChild(input);
+          input.onblur = (function (ri, c, inp) { return function () { commitEdit(inp, ri, c); }; })(item.__idx, col, input);
+          input.onkeydown = function (e) {
+            if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
+            else if (e.key === 'Escape') { editingIdx = null; render(); }
+          };
+        }
       } else {
         var val = item[col];
-        td.textContent = (val === '' || val === null || val === undefined) ? '' : val;
-        if (col === '序列') {
+        if (col === '配置') {
+          // 配置列：固定文字 + 蓝底（）内容，点击进入整行编辑
+          td.innerHTML = configDisplay(val);
+          td.style.cursor = 'pointer';
+          td.style.textAlign = 'left';
+          td.onclick = (function (ri) { return function () { editRow(ri); }; })(item.__idx);
+        } else if (col === '序列') {
           // 序列列：同一方案合并显示，点击弹出「新增变更」对话框
           td.className = 'seq-cell';
           td.rowSpan = item._span;
@@ -345,6 +430,7 @@ function render() {
           td.style.cursor = 'pointer';
           td.onclick = (function (rowIdx, c) { return function () { startEdit(td, rowIdx, c); }; })(item.__idx, col);
         } else {
+          td.textContent = (val === '' || val === null || val === undefined) ? '' : val;
           td.style.cursor = 'pointer';
           td.onclick = (function (rowIdx, c) { return function () { startEdit(td, rowIdx, c); }; })(item.__idx, col);
         }
@@ -508,23 +594,32 @@ function renderPrice() {
     priceViewColumns.forEach(function (col) {
       var td = document.createElement('td');
       if (priceEditingIdx === item.__idx) {
-        var input = document.createElement('input');
-        input.className = 'cell-input';
-        input.value = (rawData[item.__idx][col] === undefined || rawData[item.__idx][col] === null) ? '' : rawData[item.__idx][col];
-        td.appendChild(input);
-        input.onblur = (function (ri, c, inp) { return function () { commitPriceEdit(inp, ri, c); }; })(item.__idx, col, input);
-        input.onkeydown = function (e) {
-          if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
-          else if (e.key === 'Escape') { priceEditingIdx = null; renderPrice(); }
-        };
+        if (col === '配置') {
+          buildConfigEditor(td, item.__idx, true);
+        } else {
+          var input = document.createElement('input');
+          input.className = 'cell-input';
+          input.value = (rawData[item.__idx][col] === undefined || rawData[item.__idx][col] === null) ? '' : rawData[item.__idx][col];
+          td.appendChild(input);
+          input.onblur = (function (ri, c, inp) { return function () { commitPriceEdit(inp, ri, c); }; })(item.__idx, col, input);
+          input.onkeydown = function (e) {
+            if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
+            else if (e.key === 'Escape') { priceEditingIdx = null; renderPrice(); }
+          };
+        }
       } else {
         var val = item[col];
-        td.textContent = (val === '' || val === null || val === undefined) ? '' : val;
-        if (col === '序列') {
+        if (col === '配置') {
+          td.innerHTML = configDisplay(val);
+          td.style.cursor = 'pointer';
+          td.style.textAlign = 'left';
+          td.onclick = (function (ri) { return function () { editPriceRow(ri); }; })(item.__idx);
+        } else if (col === '序列') {
           // 序列号在价格视图中为自动生成，仅展示（不可点击新增变更，避免与 XM 源混淆）
           td.style.fontWeight = '600';
           td.style.color = '#1a73e8';
         } else {
+          td.textContent = (val === '' || val === null || val === undefined) ? '' : val;
           td.style.cursor = 'pointer';
           td.onclick = (function (ri, c) { return function () { startPriceEdit(td, ri, c); }; })(item.__idx, col);
         }
