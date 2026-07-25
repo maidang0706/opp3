@@ -38,13 +38,13 @@
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
   thead th {
     position: sticky; top: 0; background: #f7f8fa; color: #444; font-weight: 600;
-    padding: 6px 12px; text-align: center; border-bottom: 2px solid #e8e8e8; white-space: nowrap; z-index: 2;
+    padding: 3px 12px; text-align: center; border-bottom: 2px solid #e8e8e8; white-space: nowrap; z-index: 2;
   }
-  tbody td { padding: 4px 12px; border-bottom: 1px solid #f0f0f0; color: #444; text-align: center; position: relative; line-height: 1.35; }
+  tbody td { padding: 2px 12px; border-bottom: 1px solid #f0f0f0; color: #444; text-align: center; position: relative; line-height: 1.15; }
   tbody tr:hover { background: #f5f8ff; }
   tbody td[contenteditable], tbody td input { width: 100%; border: none; text-align: center; background: transparent; outline: none; font-size: 13px; }
   tbody td input:focus { background: #fffbe6; box-shadow: inset 0 0 0 2px #ffd666; border-radius: 4px; }
-  .del-btn { background: #ff4d4f; color: #fff; border: none; border-radius: 4px; padding: 4px 10px; cursor: pointer; font-size: 12px; }
+  .del-btn { background: #ff4d4f; color: #fff; border: none; border-radius: 4px; padding: 1px 4px; cursor: pointer; font-size: 11px; }
   .del-btn:hover { background: #e63a3c; }
   .empty-cell { color: #bbb; }
   .sync-status {
@@ -82,8 +82,10 @@
   .title-link:hover { opacity: 1; background: rgba(255,255,255,0.15); }
   .title-link.active { opacity: 1; border-bottom: 3px solid #fff; }
   /* 操作列：三个按钮纵向排列 */
-  .op-cell { display: flex; flex-direction: column; gap: 5px; align-items: stretch; padding: 6px 4px; vertical-align: top; }
-  .op-btn { padding: 4px 6px; font-size: 12px; border-radius: 5px; border: 1px solid #ddd; background: #fff; cursor: pointer; white-space: nowrap; transition: background .15s; }
+  .op-cell { display: flex; flex-direction: column; gap: 2px; align-items: stretch; padding: 2px 2px; vertical-align: top; }
+  .op-btn { padding: 1px 2px; font-size: 11px; border-radius: 4px; border: 1px solid #ddd; background: #fff; cursor: pointer; white-space: nowrap; transition: background .15s; line-height: 1.2; }
+  /* 变更时间 / 建档日期 列：固定列宽 60px，不换行，文字大小由 JS 自动缩放以适配列宽 */
+  th.col-time, td.col-time, th.col-date, td.col-date { width: 60px; min-width: 60px; max-width: 60px; white-space: nowrap; line-height: 1.2; padding-left: 3px; padding-right: 3px; }
   .op-btn:hover { background: #f0f2f5; }
   .op-btn.del-btn { color: #d33; border-color: #f0c0c0; }
   .op-btn.edit-btn { color: #1a73e8; border-color: #bcd4f8; }
@@ -113,9 +115,9 @@
   .toast.error { background: #ff4d4f; }
   .toast.info { background: #1a73e8; }
   /* 配置列模板：（）内蓝底 */
-  .cfg-fill { background: #1a73e8; color: #fff; border-radius: 3px; padding: 0 5px; }
-  .cfg-input { background: #1a73e8; color: #fff; border: 1px solid #1557b0; border-radius: 4px; padding: 2px 5px; font-size: 12px; width: 100px; outline: none; box-sizing: border-box; }
-  .cfg-input::placeholder { color: #bcd4f8; }
+  .cfg-fill { background: #e6f0fb; color: #000; border-radius: 3px; padding: 0 5px; }
+  .cfg-input { background: #e6f0fb; color: #000; border: 1px solid #b9d4f5; border-radius: 4px; padding: 2px 5px; font-size: 12px; width: 100px; outline: none; box-sizing: border-box; }
+  .cfg-input::placeholder { color: #7a93b8; }
 </style>
 </head>
 <body>
@@ -132,7 +134,7 @@
   </div>
 </div>
 
-<div id="xmView">
+<div id="xmView" style="">
 <div class="toolbar">
   <button class="btn btn-success" onclick="addRow()">＋ 新增行</button>
 </div>
@@ -149,28 +151,28 @@
     <table id="dataTable">
       <thead>
         <tr>
-          <th style="width:60px;">操作</th>
+          <th style="width:30px;">操作</th>
           <th style="width:60px;">序列</th>
-          <th>建档日期</th>
+          <th class="col-date" style="white-space: nowrap; font-size: 11.7px;">建档日期</th>
           <th>客户</th>
           <th>项目号</th>
           <th>项目名称</th>
           <th>工程师</th>
-          <th>变更时间</th>
+          <th class="col-time" style="white-space: nowrap; font-size: 11.7px;">变更时间</th>
           <th>工况</th>
           <th>型号</th>
           <th>配置</th>
           <th>其他</th>
         </tr>
       </thead>
-      <tbody id="tableBody"><tr class="row-even finalized-row"><td class="op-cell"><button class="op-btn del-btn">删除</button><button class="op-btn done-btn">完成</button><button class="op-btn finalize-btn finalized">☑ 已定型</button></td><td><input class="cell-input"></td><td><input class="cell-input"></td><td><input class="cell-input"></td><td><input class="cell-input"></td><td><input class="cell-input"></td><td><input class="cell-input"></td><td><input class="cell-input"></td><td><input class="cell-input"></td><td><input class="cell-input"></td><td class="" style="padding: 4px 6px; text-align: left; vertical-align: top;"><div style="margin: 2px 0px;"><span>电机</span>（<input class="cfg-input" placeholder="填写">）</div><div style="margin: 2px 0px;"><span>动子个数</span>（<input class="cfg-input" placeholder="填写">）</div><div style="margin: 2px 0px;"><span>驱动器型号</span>（<input class="cfg-input" placeholder="填写">）</div><div style="margin: 2px 0px;"><span>光电开关</span>（<input class="cfg-input" placeholder="填写">）</div><div style="margin: 2px 0px;"><span>导轨品牌</span>（<input class="cfg-input" placeholder="填写">）</div><div style="margin: 2px 0px;"><span>读头</span>（<input class="cfg-input" placeholder="填写">）</div><div style="margin: 2px 0px;"><span>动力线</span>（<input class="cfg-input" placeholder="填写">）</div><div style="margin: 2px 0px;"><span>编码器线</span>（<input class="cfg-input" placeholder="填写">）</div><div style="margin: 2px 0px;"><span>图纸来源</span>（<input class="cfg-input" placeholder="填写">）</div><div style="margin: 2px 0px;"><span>刹车电阻</span>（<input class="cfg-input" placeholder="填写">）</div><div style="margin: 2px 0px;"><span>其他备注</span>（<input class="cfg-input" placeholder="填写">）</div></td><td><input class="cell-input"></td></tr><tr><td class="op-cell"><button class="op-btn del-btn">删除</button><button class="op-btn edit-btn">编辑</button><button class="op-btn finalize-btn">☐ 定型</button></td><td class="seq-cell" rowspan="1"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td style="cursor: pointer;">2026/7/25 17:12:14</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer; text-align: left;">电机（<span class="cfg-fill"></span>）动子个数（<span class="cfg-fill"></span>）驱动器型号（<span class="cfg-fill"></span>）光电开关（<span class="cfg-fill"></span>）导轨品牌（<span class="cfg-fill"></span>）读头（<span class="cfg-fill"></span>）动力线（<span class="cfg-fill"></span>）编码器线（<span class="cfg-fill"></span>）图纸来源（<span class="cfg-fill"></span>）刹车电阻（<span class="cfg-fill"></span>）其他备注（<span class="cfg-fill"></span>）</td><td style="cursor: pointer;"></td></tr><tr class="row-even finalized-row"><td class="op-cell"><button class="op-btn del-btn">删除</button><button class="op-btn edit-btn">编辑</button><button class="op-btn finalize-btn finalized">☑ 已定型</button></td><td class="seq-cell" rowspan="1"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td style="cursor: pointer;">2026/7/24 13:27:39</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer; text-align: left;">电机（<span class="cfg-fill"></span>）动子个数（<span class="cfg-fill"></span>）驱动器型号（<span class="cfg-fill"></span>）光电开关（<span class="cfg-fill"></span>）导轨品牌（<span class="cfg-fill"></span>）读头（<span class="cfg-fill"></span>）动力线（<span class="cfg-fill"></span>）编码器线（<span class="cfg-fill"></span>）图纸来源（<span class="cfg-fill"></span>）刹车电阻（<span class="cfg-fill"></span>）其他备注（<span class="cfg-fill"></span>）</td><td style="cursor: pointer;"></td></tr><tr><td class="op-cell"><button class="op-btn del-btn">删除</button><button class="op-btn edit-btn">编辑</button><button class="op-btn finalize-btn">☐ 定型</button></td><td class="seq-cell" rowspan="1"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td style="cursor: pointer;">2026/7/24 13:27:38</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer; text-align: left;">电机（<span class="cfg-fill"></span>）动子个数（<span class="cfg-fill"></span>）驱动器型号（<span class="cfg-fill"></span>）光电开关（<span class="cfg-fill"></span>）导轨品牌（<span class="cfg-fill"></span>）读头（<span class="cfg-fill"></span>）动力线（<span class="cfg-fill"></span>）编码器线（<span class="cfg-fill"></span>）图纸来源（<span class="cfg-fill"></span>）刹车电阻（<span class="cfg-fill"></span>）其他备注（<span class="cfg-fill"></span>）</td><td style="cursor: pointer;"></td></tr></tbody>
+      <tbody id="tableBody"><tr class="row-even finalized-row"><td class="op-cell"><button class="op-btn del-btn">删除</button><button class="op-btn edit-btn">编辑</button><button class="op-btn finalize-btn finalized">☑定</button></td><td class="seq-cell" rowspan="1">4</td><td class="merge-cell col-date" rowspan="1" style="cursor: pointer; white-space: nowrap; font-size: 11.7px;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td class="col-time" style="cursor: pointer; white-space: nowrap; font-size: 6px;">2026/7/25 17:12:21</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer; text-align: left;">电机（<span class="cfg-fill">50-M2-S1</span>），动子个数（<span class="cfg-fill"></span>），驱动器型号（<span class="cfg-fill"></span>），光电开关（<span class="cfg-fill"></span>），导轨品牌（<span class="cfg-fill"></span>），读头（<span class="cfg-fill"></span>），动力线（<span class="cfg-fill"></span>），编码器线（<span class="cfg-fill"></span>），图纸来源（<span class="cfg-fill"></span>），刹车电阻（<span class="cfg-fill"></span>），其他备注（<span class="cfg-fill"></span>）</td><td style="cursor: pointer;"></td></tr><tr class=" finalized-row"><td class="op-cell"><button class="op-btn del-btn">删除</button><button class="op-btn edit-btn">编辑</button><button class="op-btn finalize-btn finalized">☑定</button></td><td class="seq-cell" rowspan="1">3</td><td class="merge-cell col-date" rowspan="1" style="cursor: pointer; white-space: nowrap; font-size: 11.7px;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td class="col-time" style="cursor: pointer; white-space: nowrap; font-size: 6px;">2026/7/25 17:12:14</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer; text-align: left;">电机（<span class="cfg-fill"></span>），动子个数（<span class="cfg-fill"></span>），驱动器型号（<span class="cfg-fill"></span>），光电开关（<span class="cfg-fill"></span>），导轨品牌（<span class="cfg-fill"></span>），读头（<span class="cfg-fill"></span>），动力线（<span class="cfg-fill"></span>），编码器线（<span class="cfg-fill"></span>），图纸来源（<span class="cfg-fill"></span>），刹车电阻（<span class="cfg-fill"></span>），其他备注（<span class="cfg-fill"></span>）</td><td style="cursor: pointer;"></td></tr><tr class="row-even finalized-row"><td class="op-cell"><button class="op-btn del-btn">删除</button><button class="op-btn edit-btn">编辑</button><button class="op-btn finalize-btn finalized">☑定</button></td><td class="seq-cell" rowspan="1">2</td><td class="merge-cell col-date" rowspan="1" style="cursor: pointer; white-space: nowrap; font-size: 11.7px;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td class="col-time" style="cursor: pointer; white-space: nowrap; font-size: 6px;">2026/7/24 13:27:39</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer; text-align: left;">电机（<span class="cfg-fill"></span>），动子个数（<span class="cfg-fill"></span>），驱动器型号（<span class="cfg-fill"></span>），光电开关（<span class="cfg-fill"></span>），导轨品牌（<span class="cfg-fill"></span>），读头（<span class="cfg-fill"></span>），动力线（<span class="cfg-fill"></span>），编码器线（<span class="cfg-fill"></span>），图纸来源（<span class="cfg-fill"></span>），刹车电阻（<span class="cfg-fill"></span>），其他备注（<span class="cfg-fill"></span>）</td><td style="cursor: pointer;"></td></tr><tr><td class="op-cell"><button class="op-btn del-btn">删除</button><button class="op-btn edit-btn">编辑</button><button class="op-btn finalize-btn">☐定</button></td><td class="seq-cell" rowspan="1">1</td><td class="merge-cell col-date" rowspan="1" style="cursor: pointer; white-space: nowrap; font-size: 11.7px;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td rowspan="1" class="merge-cell" style="cursor: pointer;"></td><td class="col-time" style="cursor: pointer; white-space: nowrap; font-size: 6px;">2026/7/24 13:27:38</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer; text-align: left;">电机（<span class="cfg-fill"></span>），动子个数（<span class="cfg-fill"></span>），驱动器型号（<span class="cfg-fill"></span>），光电开关（<span class="cfg-fill"></span>），导轨品牌（<span class="cfg-fill"></span>），读头（<span class="cfg-fill"></span>），动力线（<span class="cfg-fill"></span>），编码器线（<span class="cfg-fill"></span>），图纸来源（<span class="cfg-fill"></span>），刹车电阻（<span class="cfg-fill"></span>），其他备注（<span class="cfg-fill"></span>）</td><td style="cursor: pointer;"></td></tr></tbody>
     </table>
   </div>
 </div>
 </div><!-- /xmView -->
 
 <!-- 价格明细视图（由 XM 中已「定型」的行自动生成，列标题与 XM 一致） -->
-<div id="priceView" style="display:none">
+<div id="priceView" style="display: none;">
   <div class="toolbar">
     <span style="font-size:13px;color:#888;align-self:center;">本表由「XM方案明细」中已勾选为「定型」的方案自动生成，无需手动添加</span>
   </div>
@@ -186,21 +188,21 @@
       <table id="priceTable">
         <thead>
           <tr>
-            <th style="width:60px;">操作</th>
+            <th style="width:30px;">操作</th>
             <th style="width:60px;">序列</th>
-            <th>建档日期</th>
+            <th class="col-date" style="white-space: nowrap;">建档日期</th>
             <th>客户</th>
             <th>项目号</th>
             <th>项目名称</th>
             <th>工程师</th>
-            <th>变更时间</th>
+            <th class="col-time" style="white-space: nowrap;">变更时间</th>
             <th>工况</th>
             <th>型号</th>
             <th>配置</th>
             <th>其他</th>
           </tr>
         </thead>
-        <tbody id="priceTableBody"><tr class="row-even"><td class="op-cell"><button class="op-btn del-btn">删除</button><button class="op-btn edit-btn">编辑</button><button class="op-btn finalize-btn finalized">☑ 已定型</button></td><td style="font-weight: 600; color: rgb(26, 115, 232);"></td><td style="cursor: pointer;">2026/7/25 17:12:21</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;">2026/7/25 17:12:21</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer; text-align: left;">电机（<span class="cfg-fill"></span>）动子个数（<span class="cfg-fill"></span>）驱动器型号（<span class="cfg-fill"></span>）光电开关（<span class="cfg-fill"></span>）导轨品牌（<span class="cfg-fill"></span>）读头（<span class="cfg-fill"></span>）动力线（<span class="cfg-fill"></span>）编码器线（<span class="cfg-fill"></span>）图纸来源（<span class="cfg-fill"></span>）刹车电阻（<span class="cfg-fill"></span>）其他备注（<span class="cfg-fill"></span>）</td><td style="cursor: pointer;"></td></tr><tr><td class="op-cell"><button class="op-btn del-btn">删除</button><button class="op-btn edit-btn">编辑</button><button class="op-btn finalize-btn finalized">☑ 已定型</button></td><td style="font-weight: 600; color: rgb(26, 115, 232);"></td><td style="cursor: pointer;">2026/7/24 13:27:39</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;">2026/7/24 13:27:39</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer; text-align: left;">电机（<span class="cfg-fill"></span>）动子个数（<span class="cfg-fill"></span>）驱动器型号（<span class="cfg-fill"></span>）光电开关（<span class="cfg-fill"></span>）导轨品牌（<span class="cfg-fill"></span>）读头（<span class="cfg-fill"></span>）动力线（<span class="cfg-fill"></span>）编码器线（<span class="cfg-fill"></span>）图纸来源（<span class="cfg-fill"></span>）刹车电阻（<span class="cfg-fill"></span>）其他备注（<span class="cfg-fill"></span>）</td><td style="cursor: pointer;"></td></tr></tbody>
+        <tbody id="priceTableBody"><tr class="row-even"><td class="op-cell"><button class="op-btn del-btn">删除</button><button class="op-btn edit-btn">编辑</button><button class="op-btn finalize-btn finalized">☑定</button></td><td style="font-weight: 600; color: rgb(26, 115, 232);">2</td><td class="col-date" style="cursor: pointer; white-space: nowrap;">2026/7/25 17:12:21</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td class="col-time" style="cursor: pointer; white-space: nowrap;">2026/7/25 17:12:21</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer; text-align: left;">电机（<span class="cfg-fill">50-M2-S1</span>），动子个数（<span class="cfg-fill"></span>），驱动器型号（<span class="cfg-fill"></span>），光电开关（<span class="cfg-fill"></span>），导轨品牌（<span class="cfg-fill"></span>），读头（<span class="cfg-fill"></span>），动力线（<span class="cfg-fill"></span>），编码器线（<span class="cfg-fill"></span>），图纸来源（<span class="cfg-fill"></span>），刹车电阻（<span class="cfg-fill"></span>），其他备注（<span class="cfg-fill"></span>）</td><td style="cursor: pointer;"></td></tr><tr><td class="op-cell"><button class="op-btn del-btn">删除</button><button class="op-btn edit-btn">编辑</button><button class="op-btn finalize-btn finalized">☑定</button></td><td style="font-weight: 600; color: rgb(26, 115, 232);">1</td><td class="col-date" style="cursor: pointer; white-space: nowrap;">2026/7/24 13:27:39</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td class="col-time" style="cursor: pointer; white-space: nowrap;">2026/7/24 13:27:39</td><td style="cursor: pointer;"></td><td style="cursor: pointer;"></td><td style="cursor: pointer; text-align: left;">电机（<span class="cfg-fill"></span>），动子个数（<span class="cfg-fill"></span>），驱动器型号（<span class="cfg-fill"></span>），光电开关（<span class="cfg-fill"></span>），导轨品牌（<span class="cfg-fill"></span>），读头（<span class="cfg-fill"></span>），动力线（<span class="cfg-fill"></span>），编码器线（<span class="cfg-fill"></span>），图纸来源（<span class="cfg-fill"></span>），刹车电阻（<span class="cfg-fill"></span>），其他备注（<span class="cfg-fill"></span>）</td><td style="cursor: pointer;"></td></tr></tbody>
       </table>
     </div>
   </div>
@@ -235,10 +237,10 @@
   </div>
 </div>
 
-<div id="toast" class="toast success">✅ 同步成功！https://github.com/maidang0706/opp3/blob/main/data.json</div>
+<div id="toast" class="toast"></div>
 
 <!-- 数据持久化脚本：同步时会先更新此处的 rawData，再提交整个 HTML 文件 -->
-<script id="xmData">var rawData = [{"序列":4,"建档日期":"2026/7/25 17:12:21","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/25 17:12:21","工况":"","型号":"","配置":"电机（50-M2-S1）动子个数（）驱动器型号（）光电开关（）导轨品牌（）读头（）动力线（）编码器线（）图纸来源（）刹车电阻（）其他备注（）","其他":"","定型":true},{"序列":3,"建档日期":"2026/7/25 17:12:14","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/25 17:12:14","工况":"","型号":"","配置":"","其他":"","定型":false},{"序列":2,"建档日期":"2026/7/24 13:27:39","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/24 13:27:39","工况":"","型号":"","配置":"","其他":"","定型":true},{"序列":1,"建档日期":"2026/7/24 13:27:38","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/24 13:27:38","工况":"","型号":"","配置":"","其他":""}];</script>
+<script id="xmData">var rawData = [{"序列":4,"建档日期":"2026/7/25 17:12:21","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/25 17:12:21","工况":"","型号":"","配置":"电机（50-M2-S1）动子个数（）驱动器型号（）光电开关（）导轨品牌（）读头（）动力线（）编码器线（）图纸来源（）刹车电阻（）其他备注（）","其他":"","定型":true},{"序列":3,"建档日期":"2026/7/25 17:12:14","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/25 17:12:14","工况":"","型号":"","配置":"","其他":"","定型":true},{"序列":2,"建档日期":"2026/7/24 13:27:39","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/24 13:27:39","工况":"","型号":"","配置":"","其他":"","定型":true},{"序列":1,"建档日期":"2026/7/24 13:27:38","客户":"","项目号":"","项目名称":"","工程师":"","变更时间":"2026/7/24 13:27:38","工况":"","型号":"","配置":"","其他":""}];</script>
 
 <script>
 // ==================== 列定义 ====================
@@ -267,7 +269,7 @@ function parseConfig(str) {
 
 // 将 { 字段: 值 } 序列化回模板字符串
 function serializeConfig(obj) {
-  return CONFIG_FIELDS.map(function (f) { return f + '（' + (obj[f] || '') + '）'; }).join('');
+  return CONFIG_FIELDS.map(function (f) { return f + '（' + (obj[f] || '') + '）'; }).join('，');
 }
 
 // 非编辑态展示：固定文字 + 蓝底（）内容（旧版自由文本原样显示，避免丢失）
@@ -278,7 +280,7 @@ function configDisplay(val) {
   var obj = parseConfig(val || '');
   return CONFIG_FIELDS.map(function (f) {
     return f + '（<span class="cfg-fill">' + escapeHtml(obj[f] || '') + '</span>）';
-  }).join('');
+  }).join('，');
 }
 
 // 编辑态：每个（）渲染为蓝底输入框，失焦即保存对应字段
@@ -334,6 +336,26 @@ function renumberSchemes() {
 // ==================== 渲染 ====================
 var tableBody = document.getElementById('tableBody');
 
+// 自动缩放「建档日期 / 变更时间」列的文字大小，使其在不换行的前提下适配固定列宽
+function autoFitColumnText() {
+  var cells = document.querySelectorAll('th.col-time, td.col-time, th.col-date, td.col-date');
+  cells.forEach(function (cell) {
+    if (cell.querySelector('input')) return; // 编辑态（输入框）跳过
+    cell.style.whiteSpace = 'nowrap';
+    cell.style.fontSize = ''; // 重置为 CSS 基准字号（13px）
+    var cs = getComputedStyle(cell);
+    var pad = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+    var avail = cell.clientWidth - pad;
+    if (avail <= 0) return;
+    var textW = cell.scrollWidth;
+    if (textW > avail + 0.5) {
+      var base = parseFloat(cs.fontSize) || 13;
+      var size = Math.max(6, base * (avail / textW));
+      cell.style.fontSize = size.toFixed(1) + 'px';
+    }
+  });
+}
+
 function render() {
   tableBody.innerHTML = '';
   var list = getFiltered();
@@ -385,7 +407,7 @@ function render() {
     var finalized = !!rawData[rowIdx]['定型'];
     var finBtn = document.createElement('button');
     finBtn.className = 'op-btn finalize-btn' + (finalized ? ' finalized' : '');
-    finBtn.textContent = finalized ? '☑ 已定型' : '☐ 定型';
+    finBtn.textContent = finalized ? '☑定' : '☐定';
     finBtn.onclick = (function (ri) { return function () { toggleFinalize(ri); }; })(rowIdx);
     tdOp.appendChild(finBtn);
     tr.appendChild(tdOp);
@@ -394,6 +416,8 @@ function render() {
       // 合并列：非方案起始行不渲染该单元格（由起始行的 rowspan 覆盖）
       if (MERGE_COLS.indexOf(col) !== -1 && !item._isStart) return;
       var td = document.createElement('td');
+      if (col === '变更时间') td.className = 'col-time';
+      if (col === '建档日期') td.className = 'col-date';
       if (editingIdx === item.__idx) {
         if (col === '配置') {
           // 配置列：模板编辑器（固定文字 + 蓝底输入框）
@@ -422,11 +446,12 @@ function render() {
           // 序列列：同一方案合并显示，点击弹出「新增变更」对话框
           td.className = 'seq-cell';
           td.rowSpan = item._span;
+          td.textContent = (val === '' || val === null || val === undefined) ? '' : val;
           td.onclick = (function (rowIdx) { return function () { openChangeDialog(rowIdx); }; })(item.__idx);
         } else if (MERGE_COLS.indexOf(col) !== -1) {
           // 合并列：起始行带 rowspan，可点击编辑（编辑会同步到该方案所有变更）
           td.rowSpan = item._span;
-          td.className = 'merge-cell';
+          td.className = 'merge-cell' + (col === '建档日期' ? ' col-date' : '');
           td.style.cursor = 'pointer';
           td.onclick = (function (rowIdx, c) { return function () { startEdit(td, rowIdx, c); }; })(item.__idx, col);
         } else {
@@ -439,6 +464,7 @@ function render() {
     });
     tableBody.appendChild(tr);
   });
+  autoFitColumnText();
 }
 
 function getFiltered() {
@@ -586,13 +612,15 @@ function renderPrice() {
     var finalized = !!rawData[rowIdx]['定型'];
     var finBtn = document.createElement('button');
     finBtn.className = 'op-btn finalize-btn' + (finalized ? ' finalized' : '');
-    finBtn.textContent = finalized ? '☑ 已定型' : '☐ 定型';
+    finBtn.textContent = finalized ? '☑定' : '☐定';
     finBtn.onclick = (function (ri) { return function () { toggleFinalize(ri); }; })(rowIdx);
     tdOp.appendChild(finBtn);
     tr.appendChild(tdOp);
     // 数据列（列标题与 XM 一致）
     priceViewColumns.forEach(function (col) {
       var td = document.createElement('td');
+      if (col === '变更时间') td.className = 'col-time';
+      if (col === '建档日期') td.className = 'col-date';
       if (priceEditingIdx === item.__idx) {
         if (col === '配置') {
           buildConfigEditor(td, item.__idx, true);
@@ -618,6 +646,7 @@ function renderPrice() {
           // 序列号在价格视图中为自动生成，仅展示（不可点击新增变更，避免与 XM 源混淆）
           td.style.fontWeight = '600';
           td.style.color = '#1a73e8';
+          td.textContent = (val === '' || val === null || val === undefined) ? '' : val;
         } else {
           td.textContent = (val === '' || val === null || val === undefined) ? '' : val;
           td.style.cursor = 'pointer';
@@ -628,6 +657,7 @@ function renderPrice() {
     });
     priceTableBody.appendChild(tr);
   });
+  autoFitColumnText();
 }
 
 function startPriceEdit(td, rowIdx, col) {
