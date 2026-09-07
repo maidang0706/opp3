@@ -376,8 +376,8 @@
 
 <div class="header">
   <div class="title-nav">
-    <span class="title-link nav-xm active" id="navXm" onclick="showView('xm')">方案明细</span>
-    <span class="title-link nav-price" id="navPrice" onclick="showView('price')">价格明细</span>
+    <span class="title-link nav-xm" id="navXm" onclick="showView('xm')">方案明细</span>
+    <span class="title-link nav-price active" id="navPrice" onclick="showView('price')">价格明细</span>
     <span class="title-link nav-elec" id="navElec" onclick="showView('elec')">电气配置</span>
     <span class="title-link nav-order" id="navOrder" onclick="showView('order')">订单明细</span>
     <span class="title-link nav-stat" id="navStat" onclick="showView('stat')">数据统计</span>
@@ -395,7 +395,7 @@
   </div>
 </div>
 
-<div id="xmView" style="">
+<div id="xmView" style="display: none;">
 <div class="toolbar">
   <button class="btn btn-success" onclick="openAddRowModal()">＋ 新增行</button>
   <span class="zoom-group">
@@ -426,7 +426,7 @@
 </div><!-- /xmView -->
 
 <!-- 价格明细视图（由 XM 中已「定型」的行自动生成，列标题与 XM 一致） -->
-<div id="priceView" style="display: none;">
+<div id="priceView" style="">
   <div class="toolbar">
     <span class="zoom-group">
       <button class="btn btn-outline" title="缩小视图" onclick="zoomView('price', -0.1)">A－</button>
@@ -448,7 +448,7 @@
     <div class="table-scroll">
       <table id="priceTable" style="width: 1466px; zoom: 0.9;"><colgroup id="priceColGroup"><col style="width: 36px;"><col style="width: 50px;"><col style="width: 83px;"><col style="width: 58px;"><col style="width: 139px;"><col style="width: 93px;"><col style="width: 48px;"><col style="width: 90px;"><col style="width: 61px;"><col style="width: 60px;"><col style="width: 50px;"><col style="width: 47px;"><col style="width: 48px;"><col style="width: 48px;"><col style="width: 48px;"><col style="width: 108px;"><col style="width: 46px;"><col style="width: 67px;"><col style="width: 88px;"><col style="width: 100px;"><col style="width: 98px;"></colgroup>
         <thead id="priceHead"><tr><th>序列<span class="col-resizer"></span></th><th>客户<span class="col-resizer"></span></th><th>项目号<br>项目名称<span class="col-resizer"></span></th><th>工程师<span class="col-resizer"></span></th><th>模组下单型号<span class="col-resizer"></span></th><th class="col-config">电机型号<span class="col-resizer"></span></th><th class="col-config">动子个数<span class="col-resizer"></span></th><th class="col-config">驱动器型号<span class="col-resizer"></span></th><th class="col-config">光电&amp;个数<span class="col-resizer"></span></th><th class="col-config">导轨<span class="col-resizer"></span></th><th class="col-config">读头<span class="col-resizer"></span></th><th class="col-config">动力线<span class="col-resizer"></span></th><th class="col-config">编码器线<span class="col-resizer"></span></th><th class="col-config">图纸来源<span class="col-resizer"></span></th><th class="col-config">刹车电阻<span class="col-resizer"></span></th><th class="col-config">其他<span class="col-resizer"></span></th><th class="col-op">操作<span class="col-resizer"></span></th><th>价格申请日期<span class="col-resizer"></span></th><th>成交价<br>成交价备注<span class="col-resizer"></span></th><th>公司价格<br>公司价格备注<span class="col-resizer"></span></th><th>报价<br>报价备注<span class="col-resizer"></span></th></tr></thead>
-        <tbody id="priceTableBody"><tr><td colspan="21" style="padding:14px;color:#999;">暂无定型方案，请在「XM方案明细」中将方案勾选为「定型」</td></tr></tbody>
+        <tbody id="priceTableBody"><tr><td class="c-nowrap" title="点击查看/复制整行文本" style="cursor: pointer;">533</td><td>汇艺</td><td><br></td><td></td><td>EL125-25-M2-L2220-B-HYJX</td><td>25-M2-S1</td><td>1</td><td>LDHD2-0062AEC</td><td>华怡丰</td><td>国产</td><td>线马磁栅</td><td>7米</td><td>7米</td><td>标题图库</td><td>无</td><td>无</td><td class="col-op"><button class="btn btn-outline btn-xs">编辑</button></td><td></td><td><div class="cp-top"></div><div class="cp-bot"></div></td><td><div class="cp-top"></div><div class="cp-bot"></div></td><td><div class="cp-top"></div><div class="cp-bot"></div></td></tr></tbody>
       </table>
     </div>
   </div>
