@@ -725,7 +725,7 @@
   </div>
 </div><!-- /elecTextModal -->
 
-<div id="toast" class="toast"></div>
+<div id="toast" class="toast success">✅ 同步成功！（图片列仅存本机 E 盘，不随 GitHub 同步）</div>
 
 <!-- 图片列放大查看器：点击单元格缩略图打开，再点一次（或 Esc）关闭回到单元格大小 -->
 <div id="imgViewer" class="img-viewer" onclick="closeImgViewer()" title="点击关闭">
