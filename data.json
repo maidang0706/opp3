@@ -908,7 +908,7 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
   </div>
 </div><!-- /elecTextModal -->
 
-<div id="toast" class="toast success">✅ 已自动保存 Excel 到本机：E:\111-XM\17-客户选型计算汇总\634_中基_罗思程_2610280908_EL170-25-M6-L2220-B-ZJ-260196.xlsx（1137行×6列）</div>
+<div id="toast" class="toast success">✅ 同步成功！（图片列与选型计算表仅存本机 E 盘，不随 GitHub 同步）</div>
 
 <!-- 图片列放大查看器：点击单元格缩略图打开，再点一次（或 Esc）关闭回到单元格大小 -->
 <div id="imgViewer" class="img-viewer" onclick="closeImgViewer()" title="点击关闭">
