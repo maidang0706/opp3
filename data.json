@@ -218,6 +218,16 @@
   /* 非标汇总：「备注」列可编辑单元格，视觉上提示可点击 */
   #feibiaoTable td.fb-edit-cell { background: #fffbe6; }
   #feibiaoTable td.fb-edit-cell:hover { background: #fff1b8; }
+  /* 非标汇总：统一单元格/表头基线（padding、边框、对齐），编辑态与展示态内边距完全一致，杜绝编辑跳动 */
+  #feibiaoTable th, #feibiaoTable td { padding: 4px 6px; border: 1px solid #e4e8f0; text-align: center; vertical-align: middle; overflow-wrap: anywhere; word-break: break-word; }
+  #feibiaoTable thead th { position: sticky; top: 0; z-index: 2; background: #eef1f6; font-weight: 600; white-space: normal; line-height: 1.2; }
+  #feibiaoTable td.fb-editing { padding: 0; }
+  #feibiaoTable .cell-input { box-sizing: border-box; width: 100%; padding: 4px 6px; border: 1px solid #1a73e8; border-radius: 3px; font: inherit; font-size: inherit; text-align: inherit; line-height: 1.25; background: #fff; }
+  /* 序列列：派生序号（行号），灰字等宽数字，不可编辑 */
+  #feibiaoTable td.fb-seq { color: #55607a; font-variant-numeric: tabular-nums; cursor: default; }
+  /* 操作列：删除按钮居中、不换行 */
+  #feibiaoTable td.fb-op { white-space: nowrap; }
+  #feibiaoTable td.fb-op .btn { padding: 2px 7px; font-size: 11px; line-height: 1.5; }
   #dataTable td.c-nowrap { white-space: nowrap; }
   /* 工况及变更：保留粘贴文本里的换行符，在表格中按原换行显示为多行（编辑框为多行文本框，框内也显示换行）；
      左对齐 + 自动断词，长工况文本更易读 */
@@ -364,19 +374,4 @@
   @media (max-height: 660px) {
     #addRowModal #arFields, #editModal #emFields, #changeModal #chFields { grid-template-columns: repeat(4, 1fr); }
     #addRowModal .modal-box, #editModal .modal-box, #changeModal .modal-box { padding: 9px 11px; gap: 4px; }
-    #addRowModal #arDetail textarea.xm-detail-area, #editModal #emDetail textarea.xm-detail-area, #changeModal #chDetail textarea.xm-detail-area { height: 42px; min-height: 42px; }
-    #addRowModal .ar-quickfill, #editModal .ar-quickfill, #changeModal .ar-quickfill { padding: 5px 8px; }
-  }
-  /* 工况 / 配置 现由 chDetail 明细面板承载，沿用全局 .ch-field input 样式 */
-  .toast {
-    position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
-    padding: 10px 20px; border-radius: 8px; color: #fff; font-size: 14px; z-index: 1100;
-    opacity: 0; transition: opacity 0.3s; pointer-events: none; box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-  }
-  .toast.show { opacity: 1; }
-  .toast.success { background: #07c160; }
-  .toast.error { background: #ff4d4f; }
-  .toast.info { background: #1a73e8; }
-  /* 配置列模板：（）内蓝底 */
-  .cfg-fill { background: #e6f0fb; color: #000; border-radius: 3px; padding: 0 5px; }
-  .cfg-input { background: #e6f0fb; color: #000; border: 1px solid #b9d4f5; border-radius: 4px; padding: 2px 5px; font-size: 12px; width: 100px; outline: none; box-sizing: 
+    #a
