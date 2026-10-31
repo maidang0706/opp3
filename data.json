@@ -225,6 +225,8 @@
   #feibiaoTable .cell-input { box-sizing: border-box; width: 100%; padding: 4px 6px; border: 1px solid #1a73e8; border-radius: 3px; font: inherit; font-size: inherit; text-align: inherit; line-height: 1.25; background: #fff; }
   /* 序列列：派生序号（行号），灰字等宽数字，不可编辑 */
   #feibiaoTable td.fb-seq { color: #55607a; font-variant-numeric: tabular-nums; cursor: default; }
+  /* 非标汇总：「备注」列左对齐（仅作用于本列，不影响其它列与表头默认居中样式） */
+  #feibiaoTable td.fb-note, #feibiaoTable th.fb-note { text-align: left; }
   /* 操作列：删除按钮居中、不换行 */
   #feibiaoTable td.fb-op { white-space: nowrap; }
   #feibiaoTable td.fb-op .btn { padding: 2px 7px; font-size: 11px; line-height: 1.5; }
@@ -372,6 +374,4 @@
   #addRowModal .ar-quickfill textarea, #editModal .ar-quickfill textarea, #changeModal .ar-quickfill textarea { margin-bottom: 5px; }
   #addRowModal .modal-actions, #editModal .modal-actions, #changeModal .modal-actions { margin-top: 8px; flex-shrink: 0; }
   @media (max-height: 660px) {
-    #addRowModal #arFields, #editModal #emFields, #changeModal #chFields { grid-template-columns: repeat(4, 1fr); }
-    #addRowModal .modal-box, #editModal .modal-box, #changeModal .modal-box { padding: 9px 11px; gap: 4px; }
-    #a
+    #addRowModal #arFields, #editMod
