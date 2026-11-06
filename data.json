@@ -1029,7 +1029,7 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
   </div>
 </div>
 
-<div id="toast" class="toast success">✅ 已在第一行新增一行（序号 1，建档日期已自动填为今天）</div>
+<div id="toast" class="toast success">✅ 同步成功！（图片列仅存本机 E 盘；选型计算列记录的是 Excel 文件本地路径，随文件一并同步）</div>
 
 <!-- 图片列放大查看器：点击单元格缩略图打开，再点一次（或 Esc）关闭回到单元格大小 -->
 <div id="imgViewer" class="img-viewer" onclick="closeImgViewer()" title="点击关闭">
