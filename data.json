@@ -98,6 +98,11 @@
   .sync-status.warn { background: #fa8c16; }
   .sync-dot { width: 8px; height: 8px; border-radius: 50%; background: #fff; }
   .token-view { display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; background: #fff7e6; border: 1px solid #ffd591; border-radius: 6px; }
+  /* 头部「内置 Token 状态」徽标：一眼看出当前文件是否自带令牌，避免打开无 token 副本却不知 */
+  .token-status { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 12px; font-size: 12px; color: #fff; white-space: nowrap; }
+  .token-status.ok { background: #07c160; }
+  .token-status.warn { background: #fa8c16; }
+  .token-status.none { background: #ff4d4f; }
   .token-text { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; color: #614700; max-width: 380px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .token-text.masked { letter-spacing: 0.5px; }
   .btn-mini { padding: 3px 8px; font-size: 12px; line-height: 1.2; }
@@ -557,6 +562,7 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
     <span class="file-name-label" id="currentFileNameLabel" title="当前 HTML 文件名称">XM方案明细_261106121504_令牌常驻.html</span>
   </div>
   <div class="actions"><label class="xl-head-toggle" title="勾选后：复制选区时自动在最前面补一行列标题（选区本身已框住标题行时不重复添加）"><input type="checkbox" checked=""> 复制含表头</label>
+    <span id="tokenStatus" class="token-status ok" title="当前文件自带 GitHub Token（拆分反转可逆存储），下载副本也携带，同步无需填写。">🔑 内置 Token 已启用</span>
     <span id="syncStatus" class="sync-status syncing"><span class="sync-dot"></span><span id="syncText">同步中... · 分支:main · 文件:data.json</span></span>
     <button class="btn btn-success" id="downloadBtn" onclick="downloadFromGitHub()" title="手动从 GitHub 拉取远端最新数据（不会自动执行）">📥 从 GitHub 下载</button>
     <button class="btn btn-primary" id="syncBtn" onclick="syncToGitHub()" title="手动把本机数据上传到 GitHub（不会自动执行）" disabled="">⏳ 同步中...</button>
@@ -6806,6 +6812,30 @@ function getEffectiveToken() {
   try { var s = JSON.parse(localStorage.getItem('xm_github_settings') || '{}'); return (s.token || '').trim(); } catch (e) { return ''; }
 }
 
+// 头部「内置 Token 状态」徽标：直观显示当前文件是否自带令牌（可逆存储）。
+// 为 none 表示本副本未内置 Token（多为从 GitHub 下载的旧脱敏副本），同步会回退用浏览器保存的 Token。
+function updateTokenStatus() {
+  var el = document.getElementById('tokenStatus');
+  if (!el) return;
+  if (usingHardcodedToken()) {
+    el.className = 'token-status ok';
+    el.textContent = '🔑 内置 Token 已启用';
+    el.title = '当前文件自带 GitHub Token（拆分反转可逆存储），下载副本也携带，同步无需填写。';
+  } else {
+    var lsTok = '';
+    try { var s = JSON.parse(localStorage.getItem('xm_github_settings') || '{}'); lsTok = (s.token || '').trim(); } catch (e) {}
+    if (lsTok) {
+      el.className = 'token-status warn';
+      el.textContent = '⚠ 本副本无内置 Token（用浏览器保存的）';
+      el.title = '当前文件未内置 Token，使用的是浏览器 localStorage 中保存的 Token；若该 Token 失效会报 401，请改用带内置 Token 的文件或点「🔑 显示 Token → 重新输入」。';
+    } else {
+      el.className = 'token-status none';
+      el.textContent = '⛔ 本副本无 Token';
+      el.title = '当前文件未内置 Token 且浏览器也未保存 Token，同步前请点「🔑 显示 Token → 重新输入」粘贴，或改用自带 Token 的文件。';
+    }
+  }
+}
+
 // 默认仓库/文件路径取自 XM方案明细（项目资产）。Token 默认仅通过头部输入框填入，不写入文件内容；
 // 若上方 HARDCODED_GITHUB_TOKEN 已填写，则以其为准（硬编码优先于 localStorage）。
 var DEFAULT_GH = {
@@ -6824,6 +6854,7 @@ function loadGitHubSettings() {
       localStorage.setItem('xm_github_settings', saved);
     }
     updateSyncStatus('idle', '已配置');
+    updateTokenStatus(); // 头部「内置 Token 状态」徽标：显示当前文件是否自带令牌
   } catch (e) {}
 }
 
@@ -7775,10 +7806,20 @@ async function syncToGitHub() {
       if (meResp.status === 401) {
         // Token 失效（过期 / 被撤销 / 本机存了坏值）→ 清掉坏 token，弹窗让用户立即输入新令牌；
         // 换票验证通过后自动继续本次同步（无需用户再点一次同步按钮）
-        // 若启用了「硬编码 Token」，弹窗输入的令牌会被硬编码覆盖而无法生效，故不再循环弹窗，
-        // 直接提示用户去文件源码里改 HARDCODED_GITHUB_TOKEN（避免反复提示的死循环）
+        // 若启用了「内置 Token」，弹窗输入的令牌会被内置值覆盖而无法生效，故先尝试浏览器保存的 Token 兜底，
+        // 仍失败则给出明确指引（多半是从 GitHub 下载的旧副本不含内置 Token，需用自带 Token 的文件）
         if (usingHardcodedToken()) {
-          throw new Error('当前页面使用「硬编码 Token」，但 GitHub 已拒绝该令牌（401 Bad credentials），多半是 PAT 到期或被撤销。请直接在文件源码中把 HARDCODED_GITHUB_TOKEN 改为新的有效 Token 后重新同步（此处弹窗输入的 Token 会被硬编码覆盖，无法生效）。');
+          var _lsTok = '';
+          try { var _ls = JSON.parse(localStorage.getItem('xm_github_settings') || '{}'); _lsTok = (_ls.token || '').trim(); } catch (e2) {}
+          if (_lsTok && _lsTok !== (HARDCODED_GITHUB_TOKEN || '').trim()) {
+            try {
+              var _me2 = await ghFetch('https://api.github.com/user', { headers: { 'Authorization': 'token ' + _lsTok, 'Accept': 'application/vnd.github.v3+json' } });
+              if (_me2.ok) { settings.token = _lsTok; headers['Authorization'] = 'token ' + _lsTok; meScopes = _me2.headers.get('X-OAuth-Scopes') || ''; }
+            } catch (e3) {}
+          }
+          if (!settings.token || settings.token === (HARDCODED_GITHUB_TOKEN || '').trim()) {
+            throw new Error('当前页面内置的 GitHub Token 已被拒绝（401 Bad credentials），多半是 PAT 到期或被撤销。请改用「自带内置 Token 的文件」重新同步（或点「🔑 显示 Token → 重新输入」粘贴新 Token）。提示：从 GitHub 下载的旧副本可能不含内置 Token，这正是反复 401 的常见原因。');
+          }
         }
         try { localStorage.removeItem('xm_github_settings'); } catch (e2) {}
         var _r1 = await promptValidToken('当前 Token 无效或已过期（401 Bad credentials）。可能是本机存的令牌有误、PAT 到期或被撤销。');
@@ -7825,7 +7866,16 @@ async function syncToGitHub() {
           // 直接提示用户去文件源码里改 HARDCODED_GITHUB_TOKEN，避免反复提示
           if (blobResp.status === 401) {
             if (usingHardcodedToken()) {
-              throw new Error('当前页面使用「硬编码 Token」，但 GitHub 在上传时拒绝了该令牌（401 Bad credentials）。请直接在文件源码中把 HARDCODED_GITHUB_TOKEN 改为新的有效 Token 后重新同步（此处弹窗输入的 Token 会被硬编码覆盖，无法生效）。');
+              // 内置令牌被拒：尝试用浏览器保存的 Token 兜底一次（可能本机有更新的有效令牌）
+              var _lsTok2 = '';
+              try { var _ls2 = JSON.parse(localStorage.getItem('xm_github_settings') || '{}'); _lsTok2 = (_ls2.token || '').trim(); } catch (e2) {}
+              if (_lsTok2 && _lsTok2 !== (HARDCODED_GITHUB_TOKEN || '').trim()) {
+                headers['Authorization'] = 'token ' + _lsTok2; settings.token = _lsTok2;
+                lastErr = new Error('内置 Token 失效，已改用浏览器保存的 Token 重试上传…');
+                await ghSleep(300);
+                continue;
+              }
+              throw new Error('当前页面内置的 GitHub Token 在上传时被拒绝（401 Bad credentials），多半是 PAT 到期或被撤销。请改用「自带内置 Token 的文件」重新同步（或点「🔑 显示 Token → 重新输入」粘贴新 Token）。提示：从 GitHub 下载的旧副本可能不含内置 Token，这正是反复 401 的常见原因。');
             }
             try { localStorage.removeItem('xm_github_settings'); } catch (e2) {}
             var _r2 = await promptValidToken('上传时 GitHub 拒绝了当前令牌（401 Bad credentials）。');
