@@ -649,7 +649,7 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
     <span class="title-link nav-fb" id="navFb" onclick="showView('feibiao')">非标汇总</span>
     <span class="title-link nav-order" id="navOrder" onclick="showView('order')">订单明细</span>
     <span class="title-link nav-stat" id="navStat" onclick="showView('stat')">数据统计</span>
-    <span class="file-name-label" id="currentFileNameLabel" title="当前 HTML 文件名称">XM方案明细_261122214449_生成文件规则.html</span>
+    <span class="file-name-label" id="currentFileNameLabel" title="当前 HTML 文件名称">XM方案明细_261123180315_同步401修复.html</span>
   </div>
   <div class="actions"><button class="btn btn-warning" id="downloadBtn" onclick="downloadFromGitHub()" title="手动从 GitHub 拉取远端最新数据（不会自动执行）">📥 从 GitHub 下载</button><label class="xl-head-toggle" title="勾选后：复制选区时自动在最前面补一行列标题（选区本身已框住标题行时不重复添加）"><input type="checkbox" checked=""> 复制含表头</label>
     <span id="tokenStatus" class="token-status ok" title="当前文件自带 GitHub Token（拆分反转可逆存储），下载副本也携带，同步无需填写。">🔑 内置 Token 已启用</span>
@@ -7254,8 +7254,16 @@ function usingHardcodedToken() {
   var hc = (HARDCODED_GITHUB_TOKEN || '').trim();
   return !!hc;
 }
-// 解析实际使用的 Token：硬编码优先；否则回退到浏览器 localStorage 中保存的 Token
+// 【运行时 Token 覆盖】401 换票 / 界面「重新输入」得到的新 Token 存这里，优先级高于内置硬编码。
+// 这样即便文件内置 Token 失效（或打开的是无内置 Token 的下载副本），用户输入的新令牌也能真正生效，
+// 根治「内置优先导致新 Token 永远不生效 → 反复 401」的死锁。
+var _runtimeTokenOverride = '';
+function setRuntimeTokenOverride(tok) { _runtimeTokenOverride = (tok || '').trim(); }
+function getRuntimeTokenOverride() { return (_runtimeTokenOverride || '').trim(); }
+// 解析实际使用的 Token，优先级：运行时覆盖 > 内置硬编码 > 浏览器 localStorage
 function getEffectiveToken() {
+  var ov = getRuntimeTokenOverride();
+  if (ov) return ov;
   if (usingHardcodedToken()) return (HARDCODED_GITHUB_TOKEN || '').trim();
   try { var s = JSON.parse(localStorage.getItem('xm_github_settings') || '{}'); return (s.token || '').trim(); } catch (e) { return ''; }
 }
@@ -7265,7 +7273,11 @@ function getEffectiveToken() {
 function updateTokenStatus() {
   var el = document.getElementById('tokenStatus');
   if (!el) return;
-  if (usingHardcodedToken()) {
+  if (getRuntimeTokenOverride()) {
+    el.className = 'token-status ok';
+    el.textContent = '🔑 已换新 Token（本次有效）';
+    el.title = '已用你新输入的 Token 覆盖内置令牌，本次同步立即生效。刷新页面后会恢复内置令牌；如需长期生效，请更新文件中的内置 Token。';
+  } else if (usingHardcodedToken()) {
     el.className = 'token-status ok';
     el.textContent = '🔑 内置 Token 已启用';
     el.title = '当前文件自带 GitHub Token（拆分反转可逆存储），下载副本也携带，同步无需填写。';
@@ -7418,30 +7430,40 @@ async function promptValidToken(reasonMsg) {
 }
 // 换票成功后统一落库 + 更新请求头（settings 为 syncToGitHub 内的配置对象）
 function adoptNewToken(settings, newTok, headers) {
+  setRuntimeTokenOverride(newTok);   // 【关键修复】运行时覆盖，确保新 Token 优先于内置硬编码、立即生效
   settings.token = newTok;
   try {
     var s = getGitHubSettings(); s.token = newTok;
     localStorage.setItem('xm_github_settings', JSON.stringify(s));
   } catch (e) {}
   if (headers) headers['Authorization'] = 'token ' + newTok;
+  try { updateTokenStatus(); } catch (e) {}
 }
-// 重新输入 Token：清掉本机旧令牌并立即要求粘贴新令牌，覆盖旧凭据（不写入文件，仅存浏览器 localStorage）
-function reinputToken() {
-  // 启用「硬编码 Token」时，此处写入的 localStorage 令牌会被源码里的硬编码值覆盖，输入无效；
-  // 直接提示用户去改文件源码，避免无效操作
-  if (usingHardcodedToken()) {
-    showToast('⚠ 当前使用「硬编码 Token」，头部「重新输入」无效。请直接修改文件源码中的 HARDCODED_GITHUB_TOKEN 为新的有效 Token', 'error');
-    return;
-  }
-  var t = prompt('请输入新的 GitHub Token（将替换当前令牌）：');
-  if (!t) return;
+// 重新输入 Token：粘贴新令牌 → 运行时覆盖（优先级高于内置硬编码）→ 同步 localStorage → 立即验证。
+// 【关键修复】旧版在「硬编码 Token」模式下直接禁用本功能、只提示改源码，导致内置令牌失效后
+// 界面上没有任何能真正生效的换票入口（新 token 被硬编码优先覆盖），陷入反复 401。
+// 现在新令牌写入 _runtimeTokenOverride，getEffectiveToken() 会优先采用，立即生效。
+async function reinputToken() {
+  var t = prompt('请输入新的 GitHub Token（将替换当前内置令牌，立即生效；需 repo 权限）：');
+  if (t === null) return;
   t = sanitizeToken(t);
-  if (!t) return;
-  var s = getGitHubSettings();
-  s.token = t;
-  try { localStorage.setItem('xm_github_settings', JSON.stringify(s)); } catch (e) {}
-  _tokenPlain = false; renderTokenView(); // 保持掩码显示，避免明文落入同步内容
-  showToast('✅ Token 已更新，点「🔄 同步到 GitHub」即可上传', 'success');
+  if (!t) { showToast('⚠ 未识别到 Token 内容', 'error'); return; }
+  setRuntimeTokenOverride(t);                       // ① 运行时覆盖：立即生效（关键）
+  var s = getGitHubSettings(); s.token = t;
+  try { localStorage.setItem('xm_github_settings', JSON.stringify(s)); } catch (e) {} // ② 同步落库
+  _tokenPlain = false;
+  try { updateTokenStatus(); renderTokenView(); } catch (e) {}
+  // ③ 立即验证新令牌（给出明确反馈）
+  try {
+    var resp = await ghFetch('https://api.github.com/user', { headers: { 'Authorization': 'token ' + t, 'Accept': 'application/vnd.github.v3+json' } });
+    if (resp.ok) {
+      showToast('✅ 新 Token 验证通过，点「🔄 同步到 GitHub」即可上传', 'success');
+    } else {
+      showToast('⚠ 新 Token 验证失败（' + resp.status + '），请确认已复制完整并具备 repo 权限', 'error');
+    }
+  } catch (e) {
+    showToast('✅ Token 已更新（网络原因未能预检），点「🔄 同步到 GitHub」即可上传', 'info');
+  }
 }
 
 // ==================== 复制单元格 → Excel（Tab 分隔，可直接粘贴到 Excel） ====================
@@ -8208,9 +8230,12 @@ function ghIsRetryable(e) {
 async function syncToGitHub() {
   var settings = getGitHubSettings();
   if (!settings.token) {
-    var t = prompt('请输入 GitHub Token：');
+    var t = prompt('请输入 GitHub Token（需 repo 权限）：');
     if (!t) return;
-    settings.token = sanitizeToken(t);
+    t = sanitizeToken(t);
+    if (!t) { showToast('⚠ 未识别到 Token 内容', 'error'); return; }
+    setRuntimeTokenOverride(t);   // 运行时覆盖，确保本次立即生效
+    settings.token = t;
     localStorage.setItem('xm_github_settings', JSON.stringify(settings));
   }
   if (!settings.user || !settings.repo) { showToast('配置错误', 'error'); return; }
@@ -8257,28 +8282,28 @@ async function syncToGitHub() {
       });
       var meScopes = meResp.headers.get('X-OAuth-Scopes') || '';
       if (meResp.status === 401) {
-        // Token 失效（过期 / 被撤销 / 本机存了坏值）→ 清掉坏 token，弹窗让用户立即输入新令牌；
-        // 换票验证通过后自动继续本次同步（无需用户再点一次同步按钮）
-        // 若启用了「内置 Token」，弹窗输入的令牌会被内置值覆盖而无法生效，故先尝试浏览器保存的 Token 兜底，
-        // 仍失败则给出明确指引（多半是从 GitHub 下载的旧副本不含内置 Token，需用自带 Token 的文件）
-        if (usingHardcodedToken()) {
-          var _lsTok = '';
-          try { var _ls = JSON.parse(localStorage.getItem('xm_github_settings') || '{}'); _lsTok = (_ls.token || '').trim(); } catch (e2) {}
-          if (_lsTok && _lsTok !== (HARDCODED_GITHUB_TOKEN || '').trim()) {
-            try {
-              var _me2 = await ghFetch('https://api.github.com/user', { headers: { 'Authorization': 'token ' + _lsTok, 'Accept': 'application/vnd.github.v3+json' } });
-              if (_me2.ok) { settings.token = _lsTok; headers['Authorization'] = 'token ' + _lsTok; meScopes = _me2.headers.get('X-OAuth-Scopes') || ''; }
-            } catch (e3) {}
-          }
-          if (!settings.token || settings.token === (HARDCODED_GITHUB_TOKEN || '').trim()) {
-            throw new Error('当前页面内置的 GitHub Token 已被拒绝（401 Bad credentials），多半是 PAT 到期或被撤销。请改用「自带内置 Token 的文件」重新同步（或点「🔑 显示 Token → 重新输入」粘贴新 Token）。提示：从 GitHub 下载的旧副本可能不含内置 Token，这正是反复 401 的常见原因。');
-          }
+        // Token 失效（过期 / 被撤销 / 本机存了坏值）→ 一律先尝试其它来源，再弹窗换票并自动重试。
+        // 【关键修复】旧版在「内置 Token」模式下只抛错提示改源码，用户没有任何界面入口能真正换票
+        //（新 token 被硬编码优先覆盖），造成反复 401。现在统一走 promptValidToken + adoptNewToken
+        //（写入运行时覆盖、优先级最高），验证通过后本次同步自动继续，无需再点一次按钮。
+        var _recovered = false;
+        // ① 若浏览器 localStorage 里存了与当前不同的令牌，先试它
+        var _lsTok = '';
+        try { var _ls = JSON.parse(localStorage.getItem('xm_github_settings') || '{}'); _lsTok = (_ls.token || '').trim(); } catch (e2) {}
+        var _curTok = (settings.token || '').trim();
+        if (_lsTok && _lsTok !== _curTok) {
+          try {
+            var _me2 = await ghFetch('https://api.github.com/user', { headers: { 'Authorization': 'token ' + _lsTok, 'Accept': 'application/vnd.github.v3+json' } });
+            if (_me2.ok) { adoptNewToken(settings, _lsTok, headers); meScopes = _me2.headers.get('X-OAuth-Scopes') || ''; _recovered = true; }
+          } catch (e3) {}
         }
-        try { localStorage.removeItem('xm_github_settings'); } catch (e2) {}
-        var _r1 = await promptValidToken('当前 Token 无效或已过期（401 Bad credentials）。可能是本机存的令牌有误、PAT 到期或被撤销。');
-        if (!_r1) throw new Error('Token 无效或已过期（401 Bad credentials）。GitHub 已拒绝该令牌，多半是 PAT 到期或被撤销。请重新点「🔄 同步到 GitHub」输入新 Token（生成时勾选 repo 或 public_repo 权限）');
-        adoptNewToken(settings, _r1.token, headers);
-        meScopes = _r1.scopes || '';
+        // ② 其它来源都不行 → 弹窗让用户输入新 Token（最多 3 次），验证通过后覆盖并自动重试
+        if (!_recovered) {
+          var _r1 = await promptValidToken('当前 Token 已被 GitHub 拒绝（401 Bad credentials），多半是令牌到期或被撤销。请输入新的有效 Token（需 repo 权限），验证通过后会自动继续同步：');
+          if (!_r1) throw new Error('Token 无效或已过期（401 Bad credentials）。你取消了输入，或连续 3 次未通过验证。请到 GitHub 生成带 repo 权限的新 PAT 后，点「🔄 同步到 GitHub」重新输入');
+          adoptNewToken(settings, _r1.token, headers);
+          meScopes = _r1.scopes || '';
+        }
       }
       if (meResp.status === 403) {
         throw new Error('Token 无权限访问（403）。可能是该 Token 未授权此仓库，或缺少 repo/public_repo 权限。请到 GitHub 重新生成带 repo 权限的 Token 后重试');
@@ -8314,27 +8339,26 @@ async function syncToGitHub() {
         });
         if (!blobResp.ok) {
           var be = await blobResp.json().catch(function(){return {};});
-          // 401 凭据失效：清坏 token → 弹窗换票 → 验证通过后消耗本次 attempt 继续重试上传
-          // 若启用「硬编码 Token」，弹窗输入的令牌会被硬编码覆盖而无法生效，故不再循环弹窗换票，
-          // 直接提示用户去文件源码里改 HARDCODED_GITHUB_TOKEN，避免反复提示
+          // 401 凭据失效：先试浏览器保存的令牌 → 再弹窗换票 → 验证通过后消耗本次 attempt 自动重试上传。
+          // 【关键修复】旧版在「内置 Token」模式下直接抛错让用户改源码，界面无法真正换票（新 token
+          // 被硬编码优先覆盖）→ 反复 401。现在统一走 adoptNewToken（写入运行时覆盖，优先级最高）。
           if (blobResp.status === 401) {
-            if (usingHardcodedToken()) {
-              // 内置令牌被拒：尝试用浏览器保存的 Token 兜底一次（可能本机有更新的有效令牌）
-              var _lsTok2 = '';
-              try { var _ls2 = JSON.parse(localStorage.getItem('xm_github_settings') || '{}'); _lsTok2 = (_ls2.token || '').trim(); } catch (e2) {}
-              if (_lsTok2 && _lsTok2 !== (HARDCODED_GITHUB_TOKEN || '').trim()) {
-                headers['Authorization'] = 'token ' + _lsTok2; settings.token = _lsTok2;
-                lastErr = new Error('内置 Token 失效，已改用浏览器保存的 Token 重试上传…');
-                await ghSleep(300);
-                continue;
-              }
-              throw new Error('当前页面内置的 GitHub Token 在上传时被拒绝（401 Bad credentials），多半是 PAT 到期或被撤销。请改用「自带内置 Token 的文件」重新同步（或点「🔑 显示 Token → 重新输入」粘贴新 Token）。提示：从 GitHub 下载的旧副本可能不含内置 Token，这正是反复 401 的常见原因。');
+            var _recovered2 = false;
+            var _lsTok2 = '';
+            try { var _ls2 = JSON.parse(localStorage.getItem('xm_github_settings') || '{}'); _lsTok2 = (_ls2.token || '').trim(); } catch (e2) {}
+            if (_lsTok2 && _lsTok2 !== (settings.token || '').trim()) {
+              try {
+                var _meB = await ghFetch('https://api.github.com/user', { headers: { 'Authorization': 'token ' + _lsTok2, 'Accept': 'application/vnd.github.v3+json' } });
+                if (_meB.ok) { adoptNewToken(settings, _lsTok2, headers); _recovered2 = true; }
+              } catch (e3) {}
             }
-            try { localStorage.removeItem('xm_github_settings'); } catch (e2) {}
-            var _r2 = await promptValidToken('上传时 GitHub 拒绝了当前令牌（401 Bad credentials）。');
-            if (!_r2) throw new Error('Token 无效或已过期（401 Bad credentials）。多半是 PAT 到期或被撤销，请重新点「🔄 同步到 GitHub」输入新 Token（需 repo 权限）');
-            adoptNewToken(settings, _r2.token, headers);
+            if (!_recovered2) {
+              var _r2 = await promptValidToken('上传时 GitHub 拒绝了当前令牌（401 Bad credentials），多半是令牌到期或被撤销。请输入新的有效 Token（需 repo 权限），验证通过后会自动继续同步：');
+              if (!_r2) throw new Error('Token 无效或已过期（401 Bad credentials）。你取消了输入，或连续 3 次未通过验证。请到 GitHub 生成带 repo 权限的新 PAT 后重试');
+              adoptNewToken(settings, _r2.token, headers);
+            }
             lastErr = new Error('已更换 Token，重试上传…');
+            updateSyncStatus('syncing', '已换新 Token，重试上传…');
             await ghSleep(300);
             continue;
           }
